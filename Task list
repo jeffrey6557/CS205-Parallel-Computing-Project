@@ -1,0 +1,21 @@
+
+Task
+
+1.literature review on parallel neural net 
+
+2.experimental design
+
+3.get, store, process data it on in Odyssey?
+
+4.analyze algo-dependency graph (parallelism) and write code for two techniques:
+1. sequential (SGD) - (range in python)
+2. parallel SGD - prange in cython
+3. alternating minimization - where to parallel ?
+benchmark metrics
+
+5.run experiments on Odyssey and report results
+
+6.write up papers
+
+
+
