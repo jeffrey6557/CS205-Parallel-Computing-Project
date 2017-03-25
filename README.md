@@ -1,6 +1,7 @@
-# CS 205 FINAL PROJECT PROPOSAL \\
-Parallelizing Neural Network with Improved Performance 
- Linglin Huang, Chang Liu, Greyson Liu, Kamrine Poels
+# CS 205 FINAL PROJECT PROPOSAL 
+
+## Parallelizing Neural Network with Improved Performance 
+Linglin Huang, Chang Liu, Greyson Liu, Kamrine Poels
 
 ## Background
 Despite the availability of high-frequency stock market data, its use in forecasting stock prices is studied to a lesser extent. Similarly, despite the recent success of neural network on as a forecasting method, its power in forecasting high-frequency dynamics has been relatively overlooked. In addition, most of the studies in the literacture have been focused on stock market indices intead of individual stocks. A possible explanation is the intractable computational intensity of training neural network on the massive volume of high-frequency data of individual stocks. This motivates our study on applying parallelism to the training task and evaluate its performance to demonstrate weak and strong scaling. 
