@@ -7,7 +7,7 @@
 #SBATCH -p serial_requeue #Partition to submit to 
 #SBATCH -t 60 #Runtime in minutes 
 #SBATCH -n 2 #Number of MPI tasks 
-#SBATCH -c 4 #Number of cores per task
+#SBATCH -c 2 #Number of cores per task
 #SBATCH --ntasks-per-node=2 #Number of mpi tasks per node
 
 source new-modules.sh
@@ -31,10 +31,11 @@ export OMP_NUM_THREADS=$omp_threads
 # srun --cpu_bind=rank_ldom ./mpi_openmp_program
 
 # Test mpi4py
-srun -n 2 --mpi=pmi2 python mpi4py_test.py
+# srun -n 2 --mpi=pmi2 python mpi4py_test.py
 
 # Test mpi * openmp
-srun -n 2 --mpi=pmi2 python mpi4py_test.py
-
+python setup.py build_ext --inplace
+srun -n 2 --mpi=pmi2 python test.py
+rm omp_test.c
 
 
