@@ -5,60 +5,82 @@ import omp_test
 from cython import boundscheck, wraparound
 from mpi4py import MPI
 
-
-def test_omp(X, Y, n):
-	print('Testing OMP...')
-	Z_par = np.zeros((n, n))
+def test_seq(X, Y, n):
+	print('Testing seq...')
 	Z_seq = np.zeros((n, n))
 
-	start = time.time()
-	Z_par = np.array(omp_test.mmult_par(X, Y, Z_par))
-	time_par = time.time() - start
-
-	start = time.time()
 	Z_seq = np.array(omp_test.mmult_seq(X, Y, Z_seq))
-	time_seq = time.time() - start
-
-	print('Correct? ', np.allclose(Z_seq, Z_par, rtol=1e-03, atol=1e-05))
-	print(time_seq, time_par, 'speedup: ', time_seq/time_par)
 
 	return(Z_seq)
 
-def test_mpi(X, Y, n):
+def test_omp(X, Y, n):
+	print('Testing OMP...')
+	Z_omp = np.zeros((n, n))
+
+	Z_omp = np.array(omp_test.mmult_par(X, Y, Z_omp))
+
+	return(Z_omp)
+
+
+
+def test_par(X, Y, n):
+	print('Testing PAR...')
 	TaskMaster = 0
 	comm = MPI.COMM_WORLD
 	rank = comm.Get_rank()
 	size = comm.Get_size()
-	sub_n = np.ceil((n+0.0)/size) #number of rows for each
+	sub_n = int(np.ceil((n+0.0)/size)) #number of rows for each
 
 
 	# create empty matrix to store results
-	Z_sub = np.zeros((sub_n, n))
+	sub_Z = np.zeros((sub_n, n))
+
+	# if rank ==0:
+	# 	print(size, n, sub_n)
+	
 
 	# broad cast Y to every process
 	comm.bcast(Y, root=TaskMaster)
 
 	# scatter rows of X and Z
-	sub_X = np.empty([sub_n, n], dtype='i')
-	comm.scatter(X, sub_X, root=TaskMaster)
+	sub_X = np.empty([sub_n, n], dtype=np.float)
+	comm.Scatter(X, sub_X, root=TaskMaster)
 
-	for i in xrange(sub_n):
-		for j in xrange(n):
-			for k in xrange(n):
-				sub_Z[i, j] += sub_X[i, k] * Y[k, j]
+	sub_Z = np.array(omp_test.mmult_par(sub_X, Y, sub_Z))
 
 	if rank == TaskMaster:
 		Z_mpi = np.zeros((n, n))
-	comm.Gather(sub_Z, Z_mpi, root=0)
-	        
+	comm.Gather(sub_Z, Z_mpi, root=TaskMaster)
+	
 	MPI.Finalize()
-
+	# comm.Disconnect()
+	return(Z_mpi)
 
 if __name__ == '__main__':
-	n = 2**8
+	n = 2**12
 	X = np.random.random(size=(n, n))
 	Y = np.random.random(size=(n, n))
 
-	Z_seq = test_omp(X, Y, n)
-	test_mpi(X, Y, n)
-	# test_nested(X, Y, n)
+	start = time.time()
+	Z_seq = test_seq(X, Y, n)
+	time_seq = time.time() - start
+
+	start = time.time()
+	Z_omp = test_omp(X, Y, n)
+	time_omp = time.time() - start
+
+	start = time.time()
+	Z_par = test_par(X, Y, n)
+	time_par = time.time() - start
+
+
+	print('OMP Correct? ', np.allclose(Z_seq, Z_omp, rtol=1e-03, atol=1e-05))
+	print(time_seq, time_omp, 'speedup: ', time_seq/time_omp)
+
+
+	print('Correct? ', np.allclose(Z_seq, Z_par, rtol=1e-03, atol=1e-05))
+	print(time_seq, time_par, 'speedup: ', time_seq/time_par)
+
+
+
+
