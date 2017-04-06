@@ -54,31 +54,30 @@ def test_par(X, Y, n, comm):
 	# comm.Disconnect()
 	return(Z_mpi)
 
-if __name__ == '__main__':
-	comm = MPI.COMM_WORLD
-	rank = comm.Get_rank()
-	if rank == 0:
-		n = 2**8
-		X = np.random.random(size=(n, n))
-		Y = np.random.random(size=(n, n))
+comm = MPI.COMM_WORLD
+rank = comm.Get_rank()
+if rank == 0:
+	n = 2**8
+	X = np.random.random(size=(n, n))
+	Y = np.random.random(size=(n, n))
 
-		start = time.time()
-		Z_seq = test_seq(X, Y, n)
-		time_seq = time.time() - start
+	start = time.time()
+	Z_seq = test_seq(X, Y, n)
+	time_seq = time.time() - start
 
-		start = time.time()
-		Z_omp = test_omp(X, Y, n)
-		time_omp = time.time() - start
-		print('OMP Correct? ', np.allclose(Z_seq, Z_omp, rtol=1e-03, atol=1e-05))
-        	print(time_seq, time_omp, 'speedup: ', time_seq/time_omp)
+	start = time.time()
+	Z_omp = test_omp(X, Y, n)
+	time_omp = time.time() - start
+	print('OMP Correct? ', np.allclose(Z_seq, Z_omp, rtol=1e-03, atol=1e-05))
+    	print(time_seq, time_omp, 'speedup: ', time_seq/time_omp)
 
-		start = time.time()
-		Z_par = test_par(X, Y, n, comm)
-		time_par = time.time() - start
+	start = time.time()
+	Z_par = test_par(X, Y, n, comm)
+	time_par = time.time() - start
 
 
-		print('PAR Correct? ', np.allclose(Z_seq, Z_par, rtol=1e-03, atol=1e-05))
-		print(time_seq, time_par, 'speedup: ', time_seq/time_par)
+	print('PAR Correct? ', np.allclose(Z_seq, Z_par, rtol=1e-03, atol=1e-05))
+	print(time_seq, time_par, 'speedup: ', time_seq/time_par)
 
 
 
