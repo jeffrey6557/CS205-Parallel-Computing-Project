@@ -1,9 +1,9 @@
 from cython.parallel import prange
-from cython cimport boundscheck, wraparound
+cimport cython
 cimport openmp
 
-@boundscheck(False)
-@wraparound(False)
+@cython.boundscheck(False)
+@cython.wraparound(False)
 def mmult_par(double[:, :] X, 
 	double[:, :] Y, double[:, :] Z):
 	
@@ -22,8 +22,8 @@ def mmult_par(double[:, :] X,
 	# 				Z[i,j] += X[i,k] * Y[k,j]
 	return(Z)
 
-@boundscheck(False)
-@wraparound(False)
+@cython.boundscheck(False)
+@cython.wraparound(False)
 def mmult_seq(double[:, :] X, 
 	double[:, :] Y, double[:, :] Z):
 	
