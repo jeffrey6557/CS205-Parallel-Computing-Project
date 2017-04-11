@@ -24,7 +24,7 @@ output: accuracy and speed performance metrics tables/plots (see design doc)
 3.5. implement Downpour SGD and fully-connected multi-layer perceptron* on Odyssey using Python openMP and MPI packages: (Lingling, Greyson) 
 input: input numpy matrix X (T by M) where T is the time and M the number of features, and output vector Y
 output: a model that takes in new matrix X and returns a vector of predictions
-* see the design doc for other specs. 
+* if possible, please try to allow variaions in parameters (# layers, neurons, activations, learning rate, etc). see design for more details. 
 
 3.7 connect the pipeline, run a small experiment and populate the preliminary results on the website (DUE 15 April)
 
