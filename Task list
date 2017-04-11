@@ -1,22 +1,49 @@
+Tasks
 
-Task
-
-1.literature review on parallel neural net (all)
+--------------------Completed----------------
+1.Literature review on parallel neural net (all) 
 Found Downpour SGD parallelism and combined MPI-OpenMP implementation 
 
-2.experimental design （Group work)
+2.Experimental design (205 Experimental design.docx)
+2.1. define problem statement: neural network inputs and outputs 
+2.2. define backtesting procedure 
 
-3.get, store, process data it on in Odyssey?
+3.Prototyping - get a small-scale project working
+3.1. preprocess data sample (GS_sample.csv) (Chang)
+3.2. sample neural network code (pseudocode.ipynb,pseudocode.docx) 
 
-4.analyze algo-dependency graph (parallelism) and write code for two techniques:
-1. sequential (SGD) - (range in python)
-2. parallel SGD - prange in cython
-3. alternating minimization - where to parallel ?
-benchmark metrics
+-----------------------To-do--------------------
+3.3. implement feature-engineering and backtesting procedure in Python: (Chang)
+input: preprocessed stock data files
+output: input numpy matrix X and output vector Y 
 
-5.run experiments on Odyssey and report results
+3.6  implement various evaluation metrics and graphics (Kamrine)
+input: predictions, output vector Y
+output: accuracy and speed performance metrics tables/plots (see design doc)  
 
-6.write up papers
+3.5. implement Downpour SGD and fully-connected multi-layer perceptron* on Odyssey using Python openMP and MPI packages: (Lingling, Greyson) 
+input: input numpy matrix X (T by M) where T is the time and M the number of features, and output vector Y
+output: a model that takes in new matrix X and returns a vector of predictions
+* see the design doc for other specs. 
+
+3.7 connect the pipeline, run a small experiment and populate the preliminary results on the website (DUE 15 April)
+
+
+4. Scale-up the project
+4.1 data include more stocks, more indicators 
+4.2 vary the architecture to include local connections 
+4.4 cross validate on optimal parameters
+4.5 run the experiments at scale
+
+(by 23th April?)
+
+5. write up sections of papers 
+5.1 introduction 
+5.2 literature review
+5.3 data and prediction method
+5.4 arichiteure
+5.5.experimental results
+5.6 conclusion
 
 
 
