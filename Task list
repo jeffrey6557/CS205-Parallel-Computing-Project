@@ -1,5 +1,5 @@
 Tasks
-
+(DUE means hard deadline)
 --------------------Completed----------------
 1.Literature review on parallel neural net (all) 
 Found Downpour SGD parallelism and combined MPI-OpenMP implementation 
@@ -27,7 +27,8 @@ input: input numpy matrix X (T by M) where T is the time and M the number of fea
 output: a model that takes in new matrix X and returns a vector of predictions
 * if possible, please try to allow variaions in parameters (# layers, neurons, activations, learning rate, etc). see design doc for more details. 
 
-3.7 integrate the pipeline, run a small experiment and push the preliminary results to the website (DUE 15 April: update Charles)
+3.7 integrate the pipeline, run a small experiment and push the preliminary results to the website 
+(DUE 15 April: update Charles)
 
 4. Scale-up the project
 4.1 data include more stocks, more indicators 
