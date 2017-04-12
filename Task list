@@ -13,21 +13,21 @@ Found Downpour SGD parallelism and combined MPI-OpenMP implementation
 3.2. sample neural network code (pseudocode.ipynb,pseudocode.docx) 
 
 -----------------------To-do--------------------
+
 3.3. implement feature-engineering and backtesting procedure in Python: (Chang)
 input: preprocessed stock data files
 output: input numpy matrix X and output vector Y 
 
-3.6  implement various evaluation metrics and graphics (Kamrine)
+3.6  implement various evaluation metrics and graphics (Chang)
 input: predictions, output vector Y
 output: accuracy and speed performance metrics tables/plots (see design doc)  
 
 3.5. implement Downpour SGD and fully-connected multi-layer perceptron* on Odyssey using Python openMP and MPI packages: (Lingling, Greyson) 
 input: input numpy matrix X (T by M) where T is the time and M the number of features, and output vector Y
 output: a model that takes in new matrix X and returns a vector of predictions
-* if possible, please try to allow variaions in parameters (# layers, neurons, activations, learning rate, etc). see design for more details. 
+* if possible, please try to allow variaions in parameters (# layers, neurons, activations, learning rate, etc). see design doc for more details. 
 
-3.7 connect the pipeline, run a small experiment and populate the preliminary results on the website (DUE 15 April)
-
+3.7 integrate the pipeline, run a small experiment and push the preliminary results to the website (DUE 15 April: update Charles)
 
 4. Scale-up the project
 4.1 data include more stocks, more indicators 
@@ -35,7 +35,7 @@ output: a model that takes in new matrix X and returns a vector of predictions
 4.4 cross validate on optimal parameters
 4.5 run the experiments at scale
 
-(by 23th April?)
+(internal deadline by 21th April: update Charles)
 
 5. write up sections of papers 
 5.1 introduction 
@@ -44,6 +44,11 @@ output: a model that takes in new matrix X and returns a vector of predictions
 5.4 arichiteure
 5.5.experimental results
 5.6 conclusion
+
+(internal deadline by 28th April: update Charles)
+
+Deliverable: Website, paper, (code?)
+(DUE 1 May)
 
 
 
