@@ -5,8 +5,6 @@ import os
 import scipy.io as sio
 import time
 
-from mpi4py import MPI
-
 # if os.getenv('MNISTNN_GPU') == 'yes':
 #     Gpu_mode = True
 # else:
@@ -19,10 +17,6 @@ from mpi4py import MPI
 
 import theano
 import theano.tensor as T
-
-
-# Init MPI
-comm = MPI.COMM_WORLD
 
 # Structure of the 3-layer neural network.
 Input_layer_size = 400
@@ -87,15 +81,11 @@ def cost_function(theta1, theta2, input_layer_size, hidden_layer_size, output_la
     hidden_layer = sigmoid(hidden_layer)
     hidden_layer = np.insert(hidden_layer, 0, 1, axis=1)  # add bias, 5000x26
     time_end = time.time()
-    if comm.rank == 0:
-        print('\tconstruction: hidden layer dot costs {} secs'.format(time_end - time_start))
 
     time_start = time.time()
     output_layer = Matrix_dot(hidden_layer, theta2.T)  # 5000x10
     output_layer = sigmoid(output_layer)
     time_end = time.time()
-    if comm.rank == 0:
-        print('\tconstruction: output layer dot costs {} secs'.format(time_end - time_start))
 
     # forward propagation: calculate cost
     time_start = time.time()
@@ -108,8 +98,6 @@ def cost_function(theta1, theta2, input_layer_size, hidden_layer_size, output_la
             cost += error
     cost /= len(inputs)
     time_end = time.time()
-    if comm.rank == 0:
-        print('\tforward prop: costs {} secs'.format(time_end - time_start))
 
     # back propagation: calculate gradiants
     time_start = time.time()
@@ -140,9 +128,6 @@ def cost_function(theta1, theta2, input_layer_size, hidden_layer_size, output_la
     theta1_grad /= len(inputs)
     theta2_grad /= len(inputs)
     time_end = time.time()
-    if comm.rank == 0:
-        print('\tback prop: costs {} secs'.format(time_end - time_start))
-
     return cost, (theta1_grad, theta2_grad)
 
 
@@ -171,86 +156,13 @@ def gradient_descent(inputs, labels, theta1, theta2, learningrate=0.8, iteration
     cost = 0.0
     for i in range(iteration):
         time_iter_start = time.time()
-
-        if Distributed is True:
-            # Scatter training data and labels.
-            sliced_inputs = np.asarray(np.split(inputs, comm.size))
-            sliced_labels = np.asarray(np.split(labels, comm.size))
-            inputs_buf = np.zeros((len(inputs)/comm.size, Input_layer_size))
-            labels_buf = np.zeros((len(labels)/comm.size), dtype='uint8')
-
-            comm.Barrier()
-            if comm.rank == 0:
-                time_scatter_start = time.time()
-            comm.Scatter(sliced_inputs, inputs_buf)
-            if comm.rank == 0:
-                time_scatter_end = time.time()
-                print('\tScatter inputs uses {} secs.'.format(time_scatter_end - time_scatter_start))
-
-            comm.Barrier()
-            if comm.rank == 0:
-                time_scatter_start = time.time()
-            comm.Scatter(sliced_labels, labels_buf)
-            if comm.rank == 0:
-                time_scatter_end = time.time()
-                print('\tScatter labels uses {} secs.'.format(time_scatter_end - time_scatter_start))
-
-            # Calculate distributed costs and gradients of this iteration
-            # by cost function.
-            comm.Barrier()
-            cost, (theta1_grad, theta2_grad) = cost_function(theta1, theta2,
-                Input_layer_size, Hidden_layer_size, Output_layer_size,
-                inputs_buf, labels_buf, regular=0)
-
-            # Gather distributed costs and gradients.
-            comm.Barrier()
-            cost_buf = [0] * comm.size
-            try:
-                cost_buf = comm.gather(cost)
-                cost = sum(cost_buf) / len(cost_buf)
-            except TypeError as e:
-                print('[{0}] {1}'.format(comm.rank, e))
-
-            theta1_grad_buf = np.asarray([np.zeros_like(theta1_grad)] * comm.size)
-            comm.Barrier()
-            if comm.rank == 0:
-                time_gather_start = time.time()
-            comm.Gather(theta1_grad, theta1_grad_buf)
-            if comm.rank == 0:
-                time_gather_end = time.time()
-                print('\tGather theta1 uses {} secs.'.format(time_gather_end - time_gather_start))
-            comm.Barrier()
-            theta1_grad = functools.reduce(np.add, theta1_grad_buf) / comm.size
-
-            theta2_grad_buf = np.asarray([np.zeros_like(theta2_grad)] * comm.size)
-            comm.Barrier()
-            if comm.rank == 0:
-                time_gather_start = time.time()
-            comm.Gather(theta2_grad, theta2_grad_buf)
-            if comm.rank == 0:
-                time_gather_end = time.time()
-                print('\tGather theta2 uses {} secs.'.format(time_gather_end - time_gather_start))
-            comm.Barrier()
-            theta2_grad = functools.reduce(np.add, theta2_grad_buf) / comm.size
-        else:
-            cost, (theta1_grad, theta2_grad) = cost_function(theta1, theta2,
-                Input_layer_size, Hidden_layer_size, Output_layer_size,
-                inputs, labels, regular=0)
+        cost, (theta1_grad, theta2_grad) = cost_function(theta1, theta2, Input_layer_size, Hidden_layer_size, Output_layer_size,
+        inputs, labels, regular=0)
 
         theta1 -= learningrate * theta1_grad
         theta2 -= learningrate * theta2_grad
 
-        if Distributed is True:
-           # Sync-up weights for distributed worknodes.
-           comm.Bcast([theta1, MPI.DOUBLE])
-           comm.Bcast([theta2, MPI.DOUBLE])
-           comm.Barrier()
-
         time_iter_end = time.time()
-        if comm.rank == 0:
-            print('Iteration {0} (learning rate {2}, iteration {3}), cost: {1}, time: {4}'.format(
-                i+1, cost, learningrate, iteration, time_iter_end - time_iter_start)
-            )
     return cost, (theta1, theta2)
 
 def train(inputs, labels, theta1, theta2, learningrate=0.8, iteration=50):
@@ -276,7 +188,7 @@ def para_train(inputs, labels,  init_theta1, init_theta2, batchsize=10, learning
     #find a subset of inputs
     theta1 = init_theta1
     theta2 = init_theta2
-    index = np.shuffle(len(inputs))#####
+    index = np.random.shuffle(len(inputs))#####
     for i in prange(n_cores, no_gil=True):###
         theta1_tmp = init_theta1
         theta2_tmp = init_theta2
