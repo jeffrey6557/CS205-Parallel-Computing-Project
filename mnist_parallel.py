@@ -7,19 +7,18 @@ import time
 
 from mpi4py import MPI
 
-if os.getenv('MNISTNN_GPU') == 'yes':
-    Gpu_mode = True
-else:
-    Gpu_mode = False
+# if os.getenv('MNISTNN_GPU') == 'yes':
+#     Gpu_mode = True
+# else:
+#     Gpu_mode = False
 
-if os.getenv('MNISTNN_PARALLEL') == 'yes':
-    Distributed = True
-else:
-    Distributed = False
+# if os.getenv('MNISTNN_PARALLEL') == 'yes':
+#     Distributed = True
+# else:
+#     Distributed = False
 
-if Gpu_mode is True:
-    import theano
-    import theano.tensor as T
+import theano
+import theano.tensor as T
 
 
 # Init MPI
@@ -148,26 +147,26 @@ def cost_function(theta1, theta2, input_layer_size, hidden_layer_size, output_la
 
 
 
-def gradient_descent(inputs, labels, learningrate=0.8, iteration=50):
-    if Distributed is True:
-        if comm.rank == 0:
-            theta1 = rand_init_weights(Input_layer_size, Hidden_layer_size)
-            theta2 = rand_init_weights(Hidden_layer_size, Output_layer_size)
-        else:
-            theta1 = np.zeros((Hidden_layer_size, Input_layer_size + 1))
-            theta2 = np.zeros((Output_layer_size, Hidden_layer_size + 1))
-        comm.Barrier()
-        if comm.rank == 0:
-            time_bcast_start = time.time()
-        comm.Bcast([theta1, MPI.DOUBLE])
-        comm.Barrier()
-        comm.Bcast([theta2, MPI.DOUBLE])
-        if comm.rank == 0:
-            time_bcast_end = time.time()
-            print('\tBcast theta1 and theta2 uses {} secs.'.format(time_bcast_end - time_bcast_start))
-    else:
-        theta1 = rand_init_weights(Input_layer_size, Hidden_layer_size)
-        theta2 = rand_init_weights(Hidden_layer_size, Output_layer_size)
+def gradient_descent(inputs, labels, theta1, theta2, learningrate=0.8, iteration=50):
+    # if Distributed is True:
+    #     if comm.rank == 0:
+    #         theta1 = rand_init_weights(Input_layer_size, Hidden_layer_size)
+    #         theta2 = rand_init_weights(Hidden_layer_size, Output_layer_size)
+    #     else:
+    #         theta1 = np.zeros((Hidden_layer_size, Input_layer_size + 1))
+    #         theta2 = np.zeros((Output_layer_size, Hidden_layer_size + 1))
+    #     comm.Barrier()
+    #     if comm.rank == 0:
+    #         time_bcast_start = time.time()
+    #     comm.Bcast([theta1, MPI.DOUBLE])
+    #     comm.Barrier()
+    #     comm.Bcast([theta2, MPI.DOUBLE])
+    #     if comm.rank == 0:
+    #         time_bcast_end = time.time()
+    #         print('\tBcast theta1 and theta2 uses {} secs.'.format(time_bcast_end - time_bcast_start))
+    # else:
+    #     theta1 = rand_init_weights(Input_layer_size, Hidden_layer_size)
+    #     theta2 = rand_init_weights(Hidden_layer_size, Output_layer_size)
 
     cost = 0.0
     for i in range(iteration):
@@ -254,8 +253,8 @@ def gradient_descent(inputs, labels, learningrate=0.8, iteration=50):
             )
     return cost, (theta1, theta2)
 
-def train(inputs, labels, learningrate=0.8, iteration=50):
-    cost, model = gradient_descent(inputs, labels, learningrate, iteration)
+def train(inputs, labels, theta1, theta2, learningrate=0.8, iteration=50):
+    cost, model = gradient_descent(inputs, labels, theta1, theta2, learningrate, iteration)
     return model
 
 
@@ -268,6 +267,30 @@ def predict(model, inputs):
     a3 = np.dot(a2, theta2.T)  # (5000,26) x (26,10)
     a3 = sigmoid(a3)  # (5000,10)
     return [i.argmax()+1 for i in a3]
+
+
+def para_train(inputs, labels,  init_theta1, init_theta2, batchsize=10, learningrate=0.1, batch_iteration=10):
+    ################## if on the main node: n_cores = 63
+    ##################  else: n_cores = 64
+    n_cores = 64
+    #find a subset of inputs
+    theta1 = init_theta1
+    theta2 = init_theta2
+    index = np.shuffle(len(inputs))#####
+    for i in prange(n_cores, no_gil=True):###
+        theta1_tmp = init_theta1
+        theta2_tmp = init_theta2
+        with gil:
+            for j in range(batch_iteration):##
+                minibatch = [inputs[x] for x in index[i * batchsize * iteration + j * batchsize: \
+                                i * batchsize * iteration + (j + 1) * batchsize]]
+                (theta1_tmp, theta2_tmp) = train(minibatch, labels, theta1_tmp, theta2_tmp, learningrate, 1)
+        theta1 += theta1_tmp
+        theta2 += theta2_tmp
+    return (theta1/n_cores - init_theta1, theta2/n_cores - init_theta2)
+
+
+
 
 
 if __name__ == '__main__':
@@ -284,7 +307,8 @@ if __name__ == '__main__':
         print('Parallelism: no')
 
     inputs, labels = load_training_data()
-    model = train(inputs, labels, learningrate=0.1, iteration=1000)
+    model = para_train(inputs, labels, learningrate=0.1, iteration=10)
+    # model = train(inputs, labels, learningrate=0.1, iteration=10)
     outputs = predict(model, inputs)
     correct_prediction = 0
     for i, predict in enumerate(outputs):
