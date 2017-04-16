@@ -51,11 +51,16 @@ We implemented a **fully connected** network with:
 We execute data and model parallelism at two levels. Firstly, each machine (e.g. an Odyssey node) will store a Data Shard (a subset of data) and train a model replica independently and asynchronously (see Figure 1.) Each replica fetch weights (w) from the parameter server (the master node), compute grad(w) with SGD, and push grad(w) to the server. The parameter server updates the parameter set whenever it receives grad(w) from a model replica. We implemented this level with MPI (mpi4py package).
 
 # include figures here!!!
-Figure 1: Weight updating scheme[3]. 
+
+![architecture_abstract](images/architecture_abstract.png)
+
+Figure 1: Weight updating scheme[3]. Model replicas asynchronously fetch parameters w and push ∆𝑤 to the parameter server. 
 
 Secondly, each model replica approximates grad(w) by averaging the gradients from 64 or 32 (depend on number of cores in a node) parallel threads (see Figure 2). We implemented this level with OpenMP (Cython parallel module).
 
 # include figures here!!!
+![architecture](images/architecture.png)
+
 Figure 2: Parallelisation in each model replica.
 
 
@@ -71,7 +76,11 @@ We tested our two levels of parallelisations with several simulations.
 Firstly, we tested the correctness of MPI part with data generated from a simple linear model. We think this is a reasonable "naive" test case because an ANN reduces to a linear regressor when it has linear activation functions.
 
 # include figures here!!! (also need interpretations!)
+
+![loss](images/simulation_MPI_loss.png)
 Figure 3: MPI simulation, loss function
+
+![beta](images/simulation_MPI_beta.png)
 Figure 4: MPI simulation, speed up/thoughput
 
 Secondly, we tested the correctness of OpenMP part. We compared our results to an implementation available online 
