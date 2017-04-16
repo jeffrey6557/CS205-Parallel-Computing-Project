@@ -75,7 +75,7 @@ We tested our two levels of parallelisations with several simulations.
 
 Firstly, we tested the correctness of MPI implementation with data generated from a simple linear model. We think this is a reasonable "naive" test case because an ANN without hidden layers reduces to a linear regressor when it has linear activation functions.
 
-# Performance metrics of simulations using MPI
+#### Performance metrics of simulations using MPI
 
 ![loss](images/simulation_MPI_loss.png)
 
@@ -87,14 +87,14 @@ Figure 4: MPI simulation, speed up/thoughput
 
 Secondly, we tested the performance of OpenMP implementation.
 
-# Performance metrics of simulations using OpenMP
+#### Performance metrics of simulations using OpenMP
 Figure 5: OpenMP simulation, loss function
 Figure 6: OpenMP simulation, speed up/thoughput
 
 Thirdly, we tested the combined model.
 
 
-### Validation and Testing Methods
+# Validation and Testing Methods
 
 Because of the time series nature of the high-frequency data, we employ a walk-forward method that is suited for back-testing financial time series model. For each rolling window, we search for the best hyperparameters (#layers, nodes, etc) in the "validation timestep", and then evaluate the performance in the "testing timestep".
 
