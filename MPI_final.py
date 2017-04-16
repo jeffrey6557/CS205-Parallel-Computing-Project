@@ -16,6 +16,9 @@ import cost_function
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 size = comm.Get_size()
+input_col = 2
+num_neutron = 8
+output_col=1 
 
 DIETAG = 666
 n_iteration = 100
@@ -65,20 +68,21 @@ else:
 
 comm.Barrier()
 
-w1 = np.ones([2,8])
-w2 = np.ones([8,1])
-dw1 = np.empty([2,8])
-dw2 = np.empty([8,1])
-bs = np.random.randn((9,100))
-db1 = np.empty([8,100])
-db2 = np.empty([1,100])
+w1 = np.ones([input_col,num_neutron])
+w2 = np.ones([num_neutron,output_col])
+dw1 = np.empty([input_col,num_neutron])
+dw2 = np.empty([num_neutron,output_col])
+bs = np.random.randn(output_col+num_neutron)
+db1 = np.empty(num_neutron)
+db2 = np.empty(output_col)
+
 
 
 if rank == 0:
     iteration = 0
     l_old = -1 #loss
     while True:               
-        l_new = cost_function.loss(w1,w2,bs,data[:,1:3],data[:,3])##############
+        l_new = cost_function.loss(w1,w2,bs,data[:,1:3],data[:,3:4])##############
         print "loss", l_new
         epsilon = abs(l_new - l_old)
         l_old = l_new
@@ -90,9 +94,9 @@ if rank == 0:
         w2 = w2 - dw2*eta
         bs = bs - np.hstack((db1,db2))*eta
         comm.send([w1,w2,bs],dest=status.Get_source(),tag=0)
-        print "dw from worker {}".format(status.Get_source())
-        print "dw", dw
-        print 'w', w
+        print "dw1 from worker {}".format(status.Get_source())
+        #print "dw", dw1
+        #print 'w', w
 
         iteration += 1
 
@@ -102,7 +106,7 @@ if rank == 0:
 
 else:
     while True:
-        dw1, dw2,db1,db2 = cost_function.cost_function(w1,w2,bs,subdata[:,1:3],subdata[:,3])
+        dw1, dw2,db1,db2 = cost_function.cost_function(w1,w2,bs,subdata[:,1:3],subdata[:,3:4])
         comm.send([dw1,dw2,db1,db2], dest=0, tag=1)
         status = MPI.Status(),subdata[:,3]
         w1,w2,bs = comm.recv(source=0,tag=MPI.ANY_TAG,status=status)

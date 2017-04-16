@@ -17,7 +17,6 @@ cpdef addMatrix(np.ndarray[np.float64_t, ndim = 2] matA, np.ndarray[np.float64_t
     return totalMat
 
 cpdef dotMatrix(np.ndarray[np.float64_t, ndim = 2] matA, np.ndarray[np.float64_t, ndim = 2] matB):
-    
     return np.dot(matA,matB)
     
 #     cdef int i, j, k, a_row, a_col, b_col
@@ -31,16 +30,16 @@ cpdef dotMatrix(np.ndarray[np.float64_t, ndim = 2] matA, np.ndarray[np.float64_t
 #                 prodMat[i,j] = matA[i,k]*matB[k,j]
 #     return prodMat
 
-cpdef addBias(np.ndarray[np.float64_t, ndim = 2] a, np.ndarray[np.float64_t, ndim = 1] b):
+cpdef addBias(np.ndarray[np.float64_t, ndim = 2] x, np.ndarray[np.float64_t, ndim = 1] b):
 #     return np.insert(a,0,1,axis=1)
-    cdef np.ndarray[np.float64_t, ndim = 2] res = np.zeros_like(a)
-    cdef int c = a.shape[1]
-    for i in range(c):
-        res[:,i] = b
-    return a + res 
+    cdef np.ndarray[np.float64_t, ndim = 2] res = np.transpose(b.repeat(x.shape[0]).reshape(x.shape[1], x.shape[0]))
+    # cdef int c = a.shape[0]
+    # for i in range(c):
+    #     res[:,i] = b
+    # res = np.transpose(b.repeat(x.shape[0]).reshape(x.shape[1], x.shape[0]))
+    return x + res 
 
 cpdef linear(np.ndarray[np.float64_t, ndim = 2] z, np.ndarray[np.float64_t, ndim = 2] w, np.ndarray[np.float64_t, ndim = 1] b):
-    
     return addBias(dotMatrix(z,w),b)
 
 # cdef linearGradient(np.ndarray[np.float64_t, ndim = 1] w):
@@ -102,7 +101,7 @@ cpdef lossGradient(np.ndarray[np.float64_t, ndim = 2] a, np.ndarray[np.float64_t
 @boundscheck(False)
 @wraparound(False)
 cpdef cost_function(np.ndarray[np.float64_t, ndim = 2] theta1, np.ndarray[np.float64_t, ndim = 2] theta2,
-                     np.ndarray[np.float64_t, ndim = 2] bs,
+                     np.ndarray[np.float64_t, ndim = 1] bs,
                   np.ndarray[np.float64_t, ndim = 2] inputs, np.ndarray[np.float64_t, ndim = 2] labels):
     
     
@@ -110,13 +109,16 @@ cpdef cost_function(np.ndarray[np.float64_t, ndim = 2] theta1, np.ndarray[np.flo
     # forward propagation: calculate cost
     cdef int i, inputs_nrow = inputs.shape[0]
     cdef double cost = 0.0
+    cdef int num_neurons = theta1.shape[1]
+    cdef int output_layer = theta2.shape[1]
+    # cdef np.ndarray[np.float64_t, ndim = 2] bs = np.transpose(bs_raw.repeat(inputs_nrow).reshape((-1,inputs_nrow)))
     
     print 'forward prop'
     # compute inputs for this layer
     cdef np.ndarray[np.float64_t, ndim = 2] layer_input = np.zeros_like(inputs)
 #     layer_input = addBias(layer_input)
     
-    layer_input = linear(layer_input,theta1,bs[0])  # n x 3, 3 x 8 => n x 8   
+    layer_input = linear(layer_input,theta1,bs[:num_neurons])  # n x 3, 3 x 8 => n x 8   
     # compute outputs for this layer 
     
     cdef np.ndarray[np.float64_t, ndim = 2] output1 = relu(layer_input)  # n x 8 => n x 8
@@ -124,7 +126,7 @@ cpdef cost_function(np.ndarray[np.float64_t, ndim = 2] theta1, np.ndarray[np.flo
     
     layer_input = output1 #addBias(output1)
     
-    cdef np.ndarray[np.float64_t, ndim = 2] output2 = linear(layer_input,theta2,bs[1]) # n x 8, 8 x 1 => n x 1 
+    cdef np.ndarray[np.float64_t, ndim = 2] output2 = linear(layer_input,theta2,bs[-output_layer:]) # n x 8, 8 x 1 => n x 1 
     print 'output2:',output2.shape[0],output2.shape[1]
     
 
@@ -178,12 +180,13 @@ cpdef cost_function(np.ndarray[np.float64_t, ndim = 2] theta1, np.ndarray[np.flo
 #     theta2_grad = np.dot(output2, delta2)
 #     theta1_grad = np.dot(output1, delta1)
     
-    return theta1_grad,theta2_grad,delta2,delta3
+    return theta1_grad,theta2_grad,delta2[0],delta3[0]
+
 
 @boundscheck(False)
 @wraparound(False)
 cpdef loss(np.ndarray[np.float64_t, ndim = 2] theta1, np.ndarray[np.float64_t, ndim = 2] theta2,
-                     np.ndarray[np.float64_t, ndim = 2] bs,
+                     np.ndarray[np.float64_t, ndim = 1] bs,
                   np.ndarray[np.float64_t, ndim = 2] inputs, np.ndarray[np.float64_t, ndim = 2] labels):
     
     
@@ -191,13 +194,16 @@ cpdef loss(np.ndarray[np.float64_t, ndim = 2] theta1, np.ndarray[np.float64_t, n
     # forward propagation: calculate cost
     cdef int i, inputs_nrow = inputs.shape[0]
     cdef double cost = 0.0
+    cdef int num_neurons = theta1.shape[1]
+    cdef int output_layer = theta2.shape[1]
+    # cdef np.ndarray[np.float64_t, ndim = 2] bs = np.transpose(bs_raw.repeat(inputs_nrow).reshape((-1,inputs_nrow)))
     
     print 'forward prop'
     # compute inputs for this layer
     cdef np.ndarray[np.float64_t, ndim = 2] layer_input = np.zeros_like(inputs)
 #     layer_input = addBias(layer_input)
     
-    layer_input = linear(layer_input,theta1,bs[0])  # n x 3, 3 x 8 => n x 8   
+    layer_input = linear(layer_input,theta1,bs[:num_neurons])  # n x 3, 3 x 8 => n x 8   
     # compute outputs for this layer 
     
     cdef np.ndarray[np.float64_t, ndim = 2] output1 = relu(layer_input)  # n x 8 => n x 8
@@ -205,7 +211,7 @@ cpdef loss(np.ndarray[np.float64_t, ndim = 2] theta1, np.ndarray[np.float64_t, n
     
     layer_input = output1 #addBias(output1)
     
-    cdef np.ndarray[np.float64_t, ndim = 2] output2 = linear(layer_input,theta2,bs[1]) # n x 8, 8 x 1 => n x 1 
+    cdef np.ndarray[np.float64_t, ndim = 2] output2 = linear(layer_input,theta2,bs[-output_layer:]) # n x 8, 8 x 1 => n x 1 
     print 'output2:',output2.shape[0],output2.shape[1]
     
 
@@ -215,4 +221,5 @@ cpdef loss(np.ndarray[np.float64_t, ndim = 2] theta1, np.ndarray[np.float64_t, n
 #     print 'output3:',output3.shape[1]
 
     cost = get_loss(output2,labels)/inputs_nrow # scalar where layer_input = predicted ouputs T x d(=1) 
-    return cost
+
+  
