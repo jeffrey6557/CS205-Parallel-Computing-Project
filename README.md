@@ -58,7 +58,7 @@ Figure 1: Weight updating scheme[3]. Model replicas asynchronously fetch paramet
 
 Secondly, each model replica approximates grad(w) by averaging the gradients from 64 or 32 (depend on number of cores in a node) parallel threads (see Figure 2). We implemented this level with OpenMP (Cython parallel module).
 
-# include figures here!!!
+# Model Parallelism
 ![architecture](images/architecture.png)
 
 Figure 2: Parallelisation in each model replica.
@@ -73,9 +73,9 @@ Figure 2: Parallelisation in each model replica.
 
 We tested our two levels of parallelisations with several simulations.
 
-Firstly, we tested the correctness of MPI part with data generated from a simple linear model. We think this is a reasonable "naive" test case because an ANN reduces to a linear regressor when it has linear activation functions.
+Firstly, we tested the correctness of MPI implementation with data generated from a simple linear model. We think this is a reasonable "naive" test case because an ANN reduces to a linear regressor when it has linear activation functions.
 
-# include figures here!!! (also need interpretations!)
+# Performance metrics of simulations using MPI
 
 ![loss](images/simulation_MPI_loss.png)
 
@@ -85,10 +85,9 @@ Figure 3: MPI simulation, loss function
 
 Figure 4: MPI simulation, speed up/thoughput
 
-Secondly, we tested the correctness of OpenMP part. We compared our results to an implementation available online 
-# [add code citation].
+Secondly, we tested the performance of OpenMP implementation.
 
-# include figures here!!! (also need interpretations!)
+# Performance metrics of simulations using OpenMP
 Figure 5: OpenMP simulation, loss function
 Figure 6: OpenMP simulation, speed up/thoughput
 
@@ -97,30 +96,29 @@ Thirdly, we tested the combined model.
 
 ### Validation and Testing Methods
 
-We search for the best hyperparameters (#layers, nodes, etc) in the "validation step", and then evaluate the performance in the "testing step". We validate and test our model with the Dynamic Backtesting procedure:
+We search for the best hyperparameters (#layers, nodes, etc) in the "validation step", and then evaluate the performance in the "testing step". We validate and test our model with the following Dynamic Backtesting procedure:
 
 
 ```python
-#Input: define data[0 : T-1], training_size, validation_size, test_size, window_size
-#Output: predicted values from t = T-training_size-validation_size : T-1 
-#Python pseudo-code as follows
+# Input: define data[0 : T-1], training_size, validation_size, test_size, window_size
+# Output: predicted values from t = T-training_size-validation_size : T-1 
+# train each window at time t in parallel 
 for t in range(training_size + validation_size, T): 
     if t % test_size != 1:
-        #predict on time t;
+        # predict on time t using a trained ensemble Neural Network;
     else:
         training_data = data[t - training_size- validation_size : t - validation_size]
         validation_data = data[t- validation_size: t]
         for i in range(N_window):
             # train the model based on a random starting point and \
-            #       a (bootstrapped?) sample of window_size from training_data;
-            # vary the architecture* (# layer, neurons) 
+            #       a bootstrapped sample of window_size from training_data;
+            # cross-validate the architecture (# layer, neurons) 
             # calculate validation accuracy 
-        # choose the model with highest accuracy; 
+        # choose the top K models with highest accuracy to form an ensemble Neural Network; 
         # predicts on time t 
-    # compute the loss on time t
+    # compute performance metrics on time t
 ```
 
-# include figure here
 Figure 7: dynamic bracktesting procedure
 
 We search for the optimal network hyperparameters with:
@@ -132,7 +130,7 @@ We search for the optimal network hyperparameters with:
 We evaluate our model with the following metrics:
 
 1. Effectiveness
-    + Convergence of model
+    + Convergence of our model versus traditional implementation of sequential SGD 
 
 2. Accuracies
     + MSE 
@@ -141,7 +139,7 @@ We evaluate our model with the following metrics:
     + Hit ratio = mean($p_i$) where $p_i$ = 1{(y-By)($\hat{y}$-B$\hat{y}$)>0} where y is the true value $\hat{y}$ are predicted value and B is the lag operator
 
 3. Computational cost	
-    + Speedups, efficiencies, and troughputs (in Gflop/s) for different number of nodes, number of cores per core, different model size (# parameters).
+    + Speedups, efficiencies, and throughputs (in Gflop/s) for different number of nodes, number of cores per core, different model size (# parameters).
 
 
 
