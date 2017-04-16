@@ -5,8 +5,8 @@ import numpy
 
 ext_modules = [
     Extension(
-        "temp_code",
-        ["temp_code.pyx"],
+        "cost_function",
+        ["cost_function.pyx"],
         extra_compile_args=['-fopenmp'],
         extra_link_args=['-fopenmp'],
         include_dirs=[numpy.get_include()]
