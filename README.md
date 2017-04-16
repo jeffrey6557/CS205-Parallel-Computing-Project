@@ -1,6 +1,8 @@
 
 # CS 205 FINAL PROJECT INTERIM PROGRESS REPORT 
 
+URL: https://jeffrey6557.github.io/CS205-Parallel-Computing-Project/
+
 ## Parallelizing Neural Network with Improved Performance 
 Chang Liu, Greyson Liu, Kamrine Poels, Linglin Huang
 
