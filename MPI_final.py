@@ -75,14 +75,14 @@ dw2 = np.empty([num_neutron,output_col])
 bs = np.random.randn(output_col+num_neutron)
 db1 = np.empty(num_neutron)
 db2 = np.empty(output_col)
-
+layers = np.array([num_neutron,output_col])
 
 
 if rank == 0:
     iteration = 0
     l_old = -1 #loss
     while True:               
-        l_new = cost_function.loss(w1,w2,bs,data[:,1:3],data[:,3:4])##############
+        l_new = cost_function.loss(w1,w2,bs,layers ,data[:,1:3],data[:,3:4])##############
         print "loss", l_new
         epsilon = abs(l_new - l_old)
         l_old = l_new
@@ -106,8 +106,8 @@ if rank == 0:
 
 else:
     while True:
-        dw1, dw2,db1,db2 = cost_function.cost_function(w1,w2,bs,subdata[:,1:3],subdata[:,3:4])
-        comm.send([dw1,dw2,db1,db2], dest=0, tag=1)
+        dw1, dw2,db1,db2 = cost_function.cost_function(w1,w2,bs,layers ,subdata[:,1:3],subdata[:,3:4])
+        comm.send([dw1,dw2,db1.flatten(),db2.flatten()], dest=0, tag=1)
         status = MPI.Status(),subdata[:,3]
         w1,w2,bs = comm.recv(source=0,tag=MPI.ANY_TAG,status=status)
         if status.Get_tag() == DIETAG:
