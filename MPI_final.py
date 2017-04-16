@@ -1,16 +1,17 @@
 import numpy as np
 import pandas as pd
 from mpi4py import MPI
+import cost_function
 
-def loss(w, data):
-    X=data[:,0:3]
-    Y=data[:,3]
-    return np.dot(Y-np.dot(X,w),Y-np.dot(X,w))
+# def loss(w, data):
+#     X=data[:,0:3]
+#     Y=data[:,3]
+#     return np.dot(Y-np.dot(X,w),Y-np.dot(X,w))
 
-def para_train(w, subdata):
-    X=subdata[:,0:3]
-    Y=subdata[:,3]
-    return -2*np.dot(np.transpose(X),Y-np.dot(X,w))
+# def para_train(w, subdata):
+#     X=subdata[:,0:3]
+#     Y=subdata[:,3]
+#     return -2*np.dot(np.transpose(X),Y-np.dot(X,w))
 
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
@@ -64,23 +65,31 @@ else:
 
 comm.Barrier()
 
-w = np.zeros(ncol-1)
-dw = None
+w1 = np.ones([2,8])
+w2 = np.ones([8,1])
+dw1 = np.empty([2,8])
+dw2 = np.empty([8,1])
+bs = np.random.randn((9,100))
+db1 = np.empty([8,100])
+db2 = np.empty([1,100])
+
 
 if rank == 0:
     iteration = 0
     l_old = -1 #loss
     while True:               
-        l_new = loss(w,data)##############
+        l_new = cost_function.loss(w1,w2,bs,data[:,1:3],data[:,3])##############
         print "loss", l_new
         epsilon = abs(l_new - l_old)
         l_old = l_new
         if iteration > n_iteration or epsilon < EPSILON:
                 break
         status = MPI.Status()
-        dw = comm.recv(source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG,status=status)
-        w = w - dw*eta
-        comm.send(w,dest=status.Get_source(),tag=0)
+        dw1, dw2,db1,db2 = comm.recv(source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG,status=status)
+        w1 = w1 - dw1*eta
+        w2 = w2 - dw2*eta
+        bs = bs - np.hstack((db1,db2))*eta
+        comm.send([w1,w2,bs],dest=status.Get_source(),tag=0)
         print "dw from worker {}".format(status.Get_source())
         print "dw", dw
         print 'w', w
@@ -93,9 +102,9 @@ if rank == 0:
 
 else:
     while True:
-        dw = para_train(w,subdata)
-        comm.send(dw, dest=0, tag=1)
-        status = MPI.Status()
-        w = comm.recv(source=0,tag=MPI.ANY_TAG,status=status)
+        dw1, dw2,db1,db2 = cost_function.cost_function(w1,w2,bs,subdata[:,1:3],subdata[:,3])
+        comm.send([dw1,dw2,db1,db2], dest=0, tag=1)
+        status = MPI.Status(),subdata[:,3]
+        w1,w2,bs = comm.recv(source=0,tag=MPI.ANY_TAG,status=status)
         if status.Get_tag() == DIETAG:
             break

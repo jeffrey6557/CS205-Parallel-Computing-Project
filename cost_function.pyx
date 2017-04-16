@@ -134,7 +134,7 @@ cpdef cost_function(np.ndarray[np.float64_t, ndim = 2] theta1, np.ndarray[np.flo
 #     print 'output3:',output3.shape[1]
 
     cost = get_loss(output2,labels)/inputs_nrow # scalar where layer_input = predicted ouputs T x d(=1) 
-    np.diagflat(output2)
+
     
     
     print 'backward prop'
@@ -178,4 +178,41 @@ cpdef cost_function(np.ndarray[np.float64_t, ndim = 2] theta1, np.ndarray[np.flo
 #     theta2_grad = np.dot(output2, delta2)
 #     theta1_grad = np.dot(output1, delta1)
     
-    return theta2_grad,theta1_grad,delta2,delta3
+    return theta1_grad,theta2_grad,delta2,delta3
+
+@boundscheck(False)
+@wraparound(False)
+cpdef loss(np.ndarray[np.float64_t, ndim = 2] theta1, np.ndarray[np.float64_t, ndim = 2] theta2,
+                     np.ndarray[np.float64_t, ndim = 2] bs,
+                  np.ndarray[np.float64_t, ndim = 2] inputs, np.ndarray[np.float64_t, ndim = 2] labels):
+    
+    
+
+    # forward propagation: calculate cost
+    cdef int i, inputs_nrow = inputs.shape[0]
+    cdef double cost = 0.0
+    
+    print 'forward prop'
+    # compute inputs for this layer
+    cdef np.ndarray[np.float64_t, ndim = 2] layer_input = np.zeros_like(inputs)
+#     layer_input = addBias(layer_input)
+    
+    layer_input = linear(layer_input,theta1,bs[0])  # n x 3, 3 x 8 => n x 8   
+    # compute outputs for this layer 
+    
+    cdef np.ndarray[np.float64_t, ndim = 2] output1 = relu(layer_input)  # n x 8 => n x 8
+    print 'output1:',output1.shape[0],output1.shape[1]
+    
+    layer_input = output1 #addBias(output1)
+    
+    cdef np.ndarray[np.float64_t, ndim = 2] output2 = linear(layer_input,theta2,bs[1]) # n x 8, 8 x 1 => n x 1 
+    print 'output2:',output2.shape[0],output2.shape[1]
+    
+
+#     layer_input = output2 #addBias(output2)
+#     print 'layer 3 inputs',layer_input
+#     cdef np.ndarray[np.float64_t, ndim = 2] output3 = linear(layer_input,theta3,bs[2]) # n x 1, 1 x 1 => n x 1
+#     print 'output3:',output3.shape[1]
+
+    cost = get_loss(output2,labels)/inputs_nrow # scalar where layer_input = predicted ouputs T x d(=1) 
+    return cost
