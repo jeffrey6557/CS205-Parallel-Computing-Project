@@ -35,7 +35,6 @@ export OMP_NUM_THREADS=$omp_threads
 
 # Test mpi * openmp
 python setup.py build_ext --inplace
-srun -n 2 --mpi=pmi2 python test.py
-rm omp_test.c
+srun -n 2 --mpi=pmi2 python MPI_final.py
 
 

@@ -2,13 +2,14 @@
 #SBATCH --mem-per-cpu=2000 #Memory per cpu in MB (see also --mem) 
 #SBATCH -o out/test_%j.out      # File to which STDOUT will be written
 #SBATCH -e err/test_%j.err      # File to which STDERR will be written
-#SBATCH --mail-type=ALL         # Type of email notification- BEGIN,END,FAIL,ALL
-#SBATCH --mail-user=linglin_huang@g.harvard.edu # Email to which notifications will be sent
 #SBATCH -p serial_requeue #Partition to submit to 
 #SBATCH -t 60 #Runtime in minutes 
 #SBATCH -n 2 #Number of MPI tasks 
 #SBATCH -c 2 #Number of cores per task
 #SBATCH --ntasks-per-node=2 #Number of mpi tasks per node
+
+##SBATCH --mail-type=ALL         # Type of email notification- BEGIN,END,FAIL,ALL
+##SBATCH --mail-user=@g.harvard.edu # Email to which notifications will be sent
 
 source new-modules.sh
 module load python/2.7.6-fasrc01
@@ -35,7 +36,6 @@ export OMP_NUM_THREADS=$omp_threads
 
 # Test mpi * openmp
 python setup.py build_ext --inplace
-srun -n 2 --mpi=pmi2 python test.py
-rm omp_test.c
+srun -n 2 --mpi=pmi2 python MPI_final.py
 
 
