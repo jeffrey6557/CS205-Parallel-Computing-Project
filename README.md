@@ -78,9 +78,11 @@ Firstly, we tested the correctness of MPI part with data generated from a simple
 # include figures here!!! (also need interpretations!)
 
 ![loss](images/simulation_MPI_loss.png)
+
 Figure 3: MPI simulation, loss function
 
 ![beta](images/simulation_MPI_beta.png)
+
 Figure 4: MPI simulation, speed up/thoughput
 
 Secondly, we tested the correctness of OpenMP part. We compared our results to an implementation available online 
