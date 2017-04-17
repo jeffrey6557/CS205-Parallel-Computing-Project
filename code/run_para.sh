@@ -6,7 +6,7 @@
 #SBATCH --mail-user=linglin_huang@g.harvard.edu # Email to which notifications will be sent
 #SBATCH -p serial_requeue #Partition to submit to 
 #SBATCH -t 60 #Runtime in minutes 
-#SBATCH -n 2 #Number of MPI tasks 
+#SBATCH -n 3 #Number of MPI tasks 
 #SBATCH -c 2 #Number of cores per task
 #SBATCH --ntasks-per-node=2 #Number of mpi tasks per node
 
