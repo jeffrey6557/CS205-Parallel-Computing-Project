@@ -29,8 +29,6 @@ We normalize all the input and output variables:
 2. For other values, use min-max scaling: RN = (R-R_min) / (R_max – R_min) where R is the value of an input
 
 
-
-
 ## Methodology and Parallelisation
 
 ### Neural Network Architecture
@@ -145,13 +143,10 @@ We evaluate our model with the following metrics:
     + Directional Accuracy (fraction of correct predictions of up and downs per model, consider thresholded on predicted values such that only large predicted values count)
     + Hit ratio = mean($p_i$) where $p_i$ = 1{(y-By)($\hat{y}$-B$\hat{y}$)>0} where y is the true value $\hat{y}$ are predicted value and B is the lag operator
 
+![Error Metrics](images/error_metrics.pdf)
+
 3. Computational cost	
     + Speedups, efficiencies, and throughputs (in Gflop/s) for different number of nodes, number of cores per core, different model size (# parameters).
-
-
-
-
-
 
 
 
