@@ -85,13 +85,13 @@ Figure 4: MPI simulation, speed up/thoughput
 
 
 ## Performance Metrics of a Model Replica
-Secondly, we tested the performance of a single model replica using OpenMP versus CUDA implementation on predicting minute-level stock returns of Goldman Sachs in 2016. We trained a fully-connected neural network with 4 layers (# units = [42,24,12,1]) and stop training once validation is not improving for 5 epochs. 
+Secondly, we tested the performance of a single model replica using OpenMP versus CUDA implementation on predicting minute-level stock returns of Goldman Sachs in 2016. We trained a fully-connected neural network with 4 layers (# units = [42,24,12,1]) and stop training once validation is not improving for 5 epochs. For speedup experiments, epochs are set to 100. 
 
 ![loss](images/GPU_loss.png) ![speedups](images/speedups.png)
 
-LEFT: Convergence of loss function of different implementations (Max epochs = 100, batch size=1024) RIGHT: Speedups/thoughput (Epochs = 100) OpenMP with 32 threads and CUDA with 1 GPU machine. 
+LEFT: Convergence of loss function of different implementations (Max epochs = 100, batch size=128) RIGHT: Speedups/thoughput (Epochs = 100) OpenMP with 32 threads and CUDA with 1 GPU machine. 
 
-We observe that loss function converges rather quickly and has a smooth trajectory due to the large size of our batches. There is a performance peak at the batch size of 128. 
+We observe that loss function converges rather quickly and has a smooth trajectory due to the relatively large size of our batches. In terms of speedups, there is a performance peak at the batch size of 128. 
 
 Thirdly, we tested the combined model.
 
