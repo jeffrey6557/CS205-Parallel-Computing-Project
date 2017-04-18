@@ -42,10 +42,11 @@ For the prediction method, multi-layer Artificial Neural Networks (ANN) using ba
 
 We implemented a **fully connected** network with:
 
-1.	L = 1 to 10 hidden layers
-2.	number of neurons = 8~64/layer; fewer neurons in deeper layers
-3.	Optimizer learning rate, other parameters such as momentum
+1.	L = 1 to 10 layers
+2.	number of neurons = 4~64/layer; fewer neurons in deeper layers (pyramidal architecture)
+3.	Optimizer ADAM learning rate, other parameters such as momentum 
 4.	ReLu/MSE activation, linear activation for output node
+5. L2 regularization, early stopping, dropouts
 
 
 ### Parallelism Architecture
@@ -65,19 +66,14 @@ Secondly, each model replica computes ∆𝑤 by averaging the mini-batch gradie
 
 Figure 2: Parallelisation in each model replica.
 
-
-
-
 ## Experiments and Preliminary Results
-
 
 ### Preliminary Simulations
 
 We tested our two levels of parallelisations with several simulations.
 
-Firstly, we tested the correctness of MPI implementation with data generated from a simple linear model. We think this is a reasonable "naive" test case because an ANN without hidden layers reduces to a linear regressor when it has linear activation functions.
-
 #### Performance metrics of simulations using MPI
+Firstly, we tested the correctness of MPI implementation with data generated from a simple linear model. We think this is a reasonable "naive" test case because an ANN without hidden layers reduces to a linear regressor when it has linear activation functions.
 
 ![loss](images/simulation_MPI_loss.png)
 
@@ -87,24 +83,21 @@ Figure 3: MPI simulation, loss function
 
 Figure 4: MPI simulation, speed up/thoughput
 
-Secondly, we tested the performance of OpenMP implementation on minute-level stock returns of Goldman Sachs in 2016. 
-## Performance metrics of simulations using OpenMP
 
+## Performance Metrics of a Model Replica
+Secondly, we tested the performance of a single model replica using OpenMP versus CUDA implementation on predicting minute-level stock returns of Goldman Sachs in 2016. We trained a fully-connected neural network with 4 layers (# units = [42,24,12,1]) and stop training once validation is not improving for 5 epochs. 
 
-Figure 5: Convergence of loss function of different implementations (Epochs = 100)
 ![loss](images/GPU_loss.png)
+
+Figure 5: Convergence of loss function of different implementations (Max epochs = 100, batch size=1024) OpenMP with 32 threads and CUDA with 1 GPU machine. 
+
+Loss function converges rather quickly and has a smooth trajectory due to the large size of our batches.
+
+![speedups](images/speedups.png)
+
 Figure 6: Speedups/thoughput (Epochs = 100)
-![speedups](images/GPU_speedups.png)
 
-
-Thirdly, we tested the combined model.
-
-
-
-#### Performance metrics of simulations using OpenMP
-Figure 7: OpenMP, loss function
-
-Figure 8: OpenMP, speed up/thoughput
+There is a performance peak at the batch size of 128. 
 
 Thirdly, we tested the combined model.
 
