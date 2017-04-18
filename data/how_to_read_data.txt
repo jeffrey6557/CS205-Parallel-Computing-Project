@@ -1,0 +1,4 @@
+
+import numpy as np
+data = np.genfromtxt('price_inputs_GS2016.csv',delimiter=',',skip_header=1)
+X,ret = data[:,2:],data[:,1:2] # X means features, ret means target 
