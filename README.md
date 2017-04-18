@@ -87,11 +87,24 @@ Figure 3: MPI simulation, loss function
 
 Figure 4: MPI simulation, speed up/thoughput
 
-Secondly, we tested the performance of OpenMP implementation.
+Secondly, we tested the performance of OpenMP implementation on minute-level stock returns of Goldman Sachs in 2016. 
+## Performance metrics of simulations using OpenMP
+
+
+Figure 5: Convergence of loss function of different implementations (Epochs = 100)
+![loss](images/GPU_loss.png)
+Figure 6: Speedups/thoughput (Epochs = 100)
+![speedups](images/GPU_speedups.png)
+
+
+Thirdly, we tested the combined model.
+
+
 
 #### Performance metrics of simulations using OpenMP
-Figure 5: OpenMP simulation, loss function
-Figure 6: OpenMP simulation, speed up/thoughput
+Figure 7: OpenMP, loss function
+
+Figure 8: OpenMP, speed up/thoughput
 
 Thirdly, we tested the combined model.
 
