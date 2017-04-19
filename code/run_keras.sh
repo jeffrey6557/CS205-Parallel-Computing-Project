@@ -5,10 +5,16 @@
 #SBATCH --mem 5000 
 #SBATCH --gres=gpu:1
 #SBATCH --constraint=cuda-7.5
+#SBATCH -o Out%j.out       # Standard out goes to this file
+#SBATCH -e Err%j.err       # Standard err goes to this filehostname
+
 
 module load python/2.7.11-fasrc01
 source activate ody
 module load gcc/4.9.3-fasrc01 cuda/7.5-fasrc02 cudnn/7.0-fasrc02
+
+
+
 
 
 # to set device, in script 
@@ -20,14 +26,19 @@ os.environ["THEANO_FLAGS"] = "device=gpu,floatX=float32"
 # terminal command
 THEANO_FLAGS='floatX=float32,device=cpu,lib.cnmem=1,openmp=1'  python <myscript>.py
 
-
-
+# get into an iteractive gpu node and acitvate virtual environment ody 
+srun --pty --mem 4000 --gres gpu:1 -t 1200 -p gpu /bin/bash
+module load python/2.7.11-fasrc01
+source activate ody
 
 # update cmake to > 3.0
-wget http://www.cmake.org/files/v3.8/cmake-3.8.0.tar.gz
-
+wget --no-check-certificate http://www.cmake.org/files/v3.8/cmake-3.8.0.tar.gz 
 tar xzf cmake-3.8.0.tar.gz
-
+cd cmake-3.8.0
+./configure --prefix=/opt/cmake
+make
+make install
+/opt/cmake/bin/cmake -version
 
 # speedups over implementations
 seq = [302,53,35,35,23,21,20,19]

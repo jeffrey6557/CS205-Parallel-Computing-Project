@@ -24,6 +24,30 @@ b3=np.random.randn(1)
 
 ## regularization?
 def gradient(X,Y,w1,w2,w3,b1,b2,b3,batchsize):
+    '''
+    1.can you return cost (a scalar) too?
+
+    2.can you add these as arguments? 
+    gradient( ..n_nodes = [24,12],mode='full',l2_rate=0.0001,max_norm=3,dropouts=0.2)
+    
+    
+    Arguments:
+    n_nodes: a list of int for hidden nodes.
+    
+    mode: 'full' or 'local'. Fully or locally connected architecture. 
+    
+    For local connection, see Figure 2 in the 205 Experimental design.docx in the Github writeup folder. 
+        
+        hint: is it as easy as this?
+        L12 = T.dot(L01, w12) + b12 + inputs_12
+        L23 = T.dot(L12, w23) + b23 + inputs_23
+    
+    max_norm: limit the norm(weights in each layer) < scalar 
+    
+    dropouts (optional): a list of floats. Probabilities of dropping out nodes in each layer, disconnected 
+    in forward prop and backprop. A highly efficient regularization technique.
+    
+    '''
     [nrow, ncol] = X.shape 
     index = np.random.choice(range(nrow),size=batchsize,replace=False)
     trainX = X[index,:]
