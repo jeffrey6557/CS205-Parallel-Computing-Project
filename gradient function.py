@@ -28,11 +28,10 @@ def gradient(X,Y,w1,w2,w3,b1,b2,b3,batchsize):
     1.can you return cost (a scalar) too?
 
     2.can you add these as arguments? 
-    gradient( ..n_nodes = [24,12],mode='full',l2_rate=0.0001,max_norm=3,dropouts=0.2)
-    
+    gradient( ... n_nodes = [24,12],mode='full',l2_rate=0.0001,max_norm=3,dropouts=0.2)
     
     Arguments:
-    n_nodes: a list of int for hidden nodes.
+    n_nodes: a list of int for hidden nodes. Perhaps you want to change your weight arguments into a list too?
     
     mode: 'full' or 'local'. Fully or locally connected architecture. 
     
