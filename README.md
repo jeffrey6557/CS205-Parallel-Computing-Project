@@ -138,10 +138,11 @@ We evaluate our model with the following metrics:
     + Convergence of our model versus traditional implementation of sequential SGD 
 
 2. Accuracies
-    + MSE 
-    + MSPE
-    + Directional Accuracy (fraction of correct predictions of up and downs per model, consider thresholded on predicted values such that only large predicted values count)
-    + Hit ratio = mean($p_i$) where $p_i$ = 1{(y-By)($\hat{y}$-B$\hat{y}$)>0} where y is the true value $\hat{y}$ are predicted value and B is the lag operator
+    - MSE 
+    - MSPE
+    - Directional Accuracy (fraction of correct predictions of up and downs per model, consider thresholded on predicted values such that only large predicted values count)
+    - Hit ratio = mean($p_i$) where $p_i$ = 1{(y-By)($\hat{y}$-B$\hat{y}$)>0} where y is the true value $\hat{y}$ are predicted value and B is the lag operator
+
 
 ![Error Metrics](images/error_metrics.png)
 
