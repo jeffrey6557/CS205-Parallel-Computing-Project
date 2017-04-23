@@ -231,3 +231,6 @@ cpdef cost_function(double[:,::1] theta1, double[:,::1] theta2,
 #     theta1_grad = np.dot(output1, delta1)
     
     return theta2_grad,theta1_grad,delta2,delta3
+
+
+    

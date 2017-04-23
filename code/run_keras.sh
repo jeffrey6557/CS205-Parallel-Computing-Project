@@ -15,6 +15,8 @@ module load gcc/4.9.3-fasrc01 cuda/7.5-fasrc02 cudnn/7.0-fasrc02
 
 
 
+# how to update subset of weights things:
+http://deeplearning.net/software/theano/tutorial/faq_tutorial.html
 
 
 # to set device, in script 
