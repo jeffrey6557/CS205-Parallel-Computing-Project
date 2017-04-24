@@ -54,15 +54,13 @@ We execute data and model parallelism at two levels. Firstly, each machine (e.g.
 # Data and Model Parallelism 
 
 ![architecture_abstract](images/architecture_abstract.png)
-
-Figure 1: Parallelised Neural Network Architecture [3]. Model replicas asynchronously fetch parameters w and push ∆𝑤 to the parameter server. 
+*Figure 1: Parallelised Neural Network Architecture [3]. Model replicas asynchronously fetch parameters w and push ∆𝑤 to the parameter server.*
 
 Secondly, each model replica computes ∆𝑤 by averaging the mini-batch gradients from 64 or 32 (depend on number of cores in a node) parallel threads (see Figure 2). We implemented this level with OpenMP (Cython parallel module).
 
 # Parallelism in Gradient Computation
 ![architecture](images/architecture.png)
-
-Figure 2: Parallelisation in each model replica.
+*Figure 2: Parallelisation in each model replica.*
 
 ## Experiments and Preliminary Results
 
@@ -142,9 +140,6 @@ We evaluate our model with the following metrics:
     - MSPE
     - Directional Accuracy (fraction of correct predictions of up and downs per model, consider thresholded on predicted values such that only large predicted values count)
     - Hit ratio = mean($p_i$) where $p_i$ = 1{(y-By)($\hat{y}$-B$\hat{y}$)>0} where y is the true value $\hat{y}$ are predicted value and B is the lag operator
-
-
-![Error Metrics](images/error_metrics.png)
 
 3. Computational cost	
     + Speedups, efficiencies, and throughputs (in Gflop/s) for different number of nodes, number of cores per core, different model size (# parameters).
