@@ -66,7 +66,17 @@ Secondly, each model replica computes ∆𝑤 by averaging the mini-batch gradie
 
 ### Preliminary Simulations
 
-We tested our two levels of parallelisations with several simulations.
+We tested our two levels of parallelisations with **several simulations**. <span style="color:red"> **Explain bold part.** </span>
+
+Simulations: <span style="color:red"> **Change and re-order.** </span>
+
+1. MPI accuracy
+2. OpenMP model replica vs CUDA
+3. Combined model:
+	
+	- We were unable to combine models so we ran MPI+?
+
+
 
 #### Performance metrics of simulations using MPI
 Firstly, we tested the correctness of MPI implementation with data generated from a simple linear model. We think this is a reasonable "naive" test case because an ANN without hidden layers reduces to a linear regressor when it has linear activation functions.
@@ -77,16 +87,20 @@ Firstly, we tested the correctness of MPI implementation with data generated fro
 ![beta](images/simulation_MPI_beta.png)
 *Figure 4: MPI simulation, speed up/thoughput*
 
+<span style="color:red"> **Can we make these images smaller to match rest of figures???** </span>
+
 ## Performance Metrics of a Model Replica
 Secondly, we tested the performance of a single model replica using OpenMP versus CUDA implementation on predicting minute-level stock returns of Goldman Sachs in 2016. We trained a fully-connected neural network with 4 layers (# units = [42,24,12,1]) and stop training once validation is not improving for 5 epochs. For speedup experiments, epochs are set to 100. 
 
-![loss](images/GPU_loss.png) ![speedups](images/speedups.png)
+![loss](images/GPU_loss.png) 
+*Convergence of loss function of different implementations (Max epochs = 100, batch size=128) *
 
-LEFT: Convergence of loss function of different implementations (Max epochs = 100, batch size=128) RIGHT: Speedups/thoughput (Epochs = 100) OpenMP with 32 threads and CUDA with 1 GPU machine. 
+![speedups](images/speedups.png)
+*Speedups/thoughput (Epochs = 100) OpenMP with 32 threads and CUDA with 1 GPU machine. *
 
 We observe that loss function converges rather quickly and has a smooth trajectory due to the relatively large size of our batches. In terms of speedups, there is a performance peak at the batch size of 128. 
 
-Thirdly, we tested the combined model.
+Thirdly, we tested the combined model. <span style="color:red"> **No. Change** </span>
 
 # Validation and Testing Methods
 
@@ -137,15 +151,16 @@ We evaluate our model with the following metrics:
     - MSPE
     - Directional Accuracy (fraction of correct predictions of up and downs per model, consider thresholded on predicted values such that only large predicted values count)
     - Hit ratio = mean( $p_i$ ) where $p_i= 1\{(y-By)(\hat{y}-B\hat{y})>0\}$ where y is the true value $\hat{y}$ are predicted value and B is the lag operator 
-    <span style="color:red">some **Need to fix this** text</span>
+    <span style="color:red"> **Need to fix this** </span>
 
-<span style="color:red">some **Add figures for exercise 2 and 4.** text</span>
+<span style="color:red"> **Add figures for exercise 2 and 4.** </span>
 
 3. Computational cost	
     + Speedups, efficiencies, and throughputs (in Gflop/s) for different number of nodes, number of cores per core, different model size (# parameters).
 
-<span style="color:red">some **How to get Gflop/s (time is given, cores can be deduced, how to we incorporate nodes)** text</span>
+<span style="color:red"> **How to get Gflop/s (time is given, cores can be deduced, how to we incorporate nodes)** </span>
 
+## Conclusion
 
 ## References
 [1] Selmi, N., Chaabene, S., & Hachicha, N. (2015). Forecasting returns on a stock market using Artificial Neural Networks and GARCH family models: Evidence of stock market S&P 500. Decision Science Letters,4(2), 203-210. doi:10.5267/j.dsl.2014.12.002
@@ -153,13 +168,3 @@ We evaluate our model with the following metrics:
 [2] Valafar, Faramarz, and Okan K. Ersoy. (1993). A Parallel Implementation of Backpropagation Neural Network on MASPAR MP-1.
 
 [3] Dean, J., et al. (2012). Large scale distributed deep networks. Proceedings of the 25th International Conference on Neural Information Processing Systems. Lake Tahoe, Nevada, Curran Associates Inc.: 1223-1231.
-
-
-```python
-
-```
-
-
-```python
-
-```
