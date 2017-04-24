@@ -72,13 +72,10 @@ We tested our two levels of parallelisations with several simulations.
 Firstly, we tested the correctness of MPI implementation with data generated from a simple linear model. We think this is a reasonable "naive" test case because an ANN without hidden layers reduces to a linear regressor when it has linear activation functions.
 
 ![loss](images/simulation_MPI_loss.png)
-
-Figure 3: MPI simulation, loss function
+*Figure 3: MPI simulation, loss function*
 
 ![beta](images/simulation_MPI_beta.png)
-
-Figure 4: MPI simulation, speed up/thoughput
-
+*Figure 4: MPI simulation, speed up/thoughput*
 
 ## Performance Metrics of a Model Replica
 Secondly, we tested the performance of a single model replica using OpenMP versus CUDA implementation on predicting minute-level stock returns of Goldman Sachs in 2016. We trained a fully-connected neural network with 4 layers (# units = [42,24,12,1]) and stop training once validation is not improving for 5 epochs. For speedup experiments, epochs are set to 100. 
@@ -91,15 +88,13 @@ We observe that loss function converges rather quickly and has a smooth trajecto
 
 Thirdly, we tested the combined model.
 
-
 # Validation and Testing Methods
 
 Because of the time series nature of the high-frequency data, we employ a walk-forward method that is suited for back-testing financial time series model. For each rolling window, we search for the best hyperparameters (#layers, nodes, etc) in the "validation timestep", and then evaluate the performance in the "testing timestep".
 
 
 ![backtest](images/backtest.png)
-
-Figure 6: Walk-forward method for time series prediction
+*Figure 6: Walk-forward method for time series prediction.*
 
 
 The walk-foward method is implemented as follows: 
@@ -133,17 +128,23 @@ We search for the optimal network hyperparameters with:
 We evaluate our model with the following metrics:
 
 1. Effectiveness
+    
     + Convergence of our model versus traditional implementation of sequential SGD 
 
 2. Accuracies
+    
     - MSE 
     - MSPE
     - Directional Accuracy (fraction of correct predictions of up and downs per model, consider thresholded on predicted values such that only large predicted values count)
-    - Hit ratio = mean($p_i$) where $p_i$ = 1{(y-By)($\hat{y}$-B$\hat{y}$)>0} where y is the true value $\hat{y}$ are predicted value and B is the lag operator
+    - Hit ratio = mean( $p_i$ ) where $p_i= 1\{(y-By)(\hat{y}-B\hat{y})>0\}$ where y is the true value $\hat{y}$ are predicted value and B is the lag operator 
+    <span style="color:red">some **Need to fix this** text</span>
+
+<span style="color:red">some **Add figures for exercise 2 and 4.** text</span>
 
 3. Computational cost	
     + Speedups, efficiencies, and throughputs (in Gflop/s) for different number of nodes, number of cores per core, different model size (# parameters).
 
+<span style="color:red">some **How to get Gflop/s (time is given, cores can be deduced, how to we incorporate nodes)** text</span>
 
 
 ## References
