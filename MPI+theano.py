@@ -15,7 +15,7 @@ output_col=1
 DIETAG = 666
 n_iteration = 100
 EPSILON = 10**-5
-eta = 0.01  ## learning rate
+eta = 1  ## learning rate
 
 def gradient(X,Y,w1,w2,w3,b1,b2,b3,batchsize,penalty):
     [nrow, ncol] = X.shape 
@@ -129,7 +129,7 @@ if rank == 0:
                 break
         status = MPI.Status()
         dw1,dw2,dw3,db1,db2,db3 = comm.recv(source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG,status=status)
-        eta_master=eta/np.sqrt(sum(dw1**2)+sum(dw2**2)+sum(dw3**2)+sum(db1**2)+sum(db2**2)+sum(db3**2))
+        eta_master=eta/np.sqrt(sum(map(sum, dw1**2))+sum(map(sum, dw2**2))+sum(map(sum, dw3**2))+sum(db1**2)+sum(db2**2)+sum(db3**2))
         w1 = w1 - dw1*eta_master
         w2 = w2 - dw2*eta_master
         w3 = w3 - dw3*eta_master
@@ -138,8 +138,6 @@ if rank == 0:
         b3 = b3 - db3*eta_master
         comm.send([w1,w2,w3,b1,b2,b3],dest=status.Get_source(),tag=0)
         print "dw from worker {}".format(status.Get_source())
-    
-
         iteration += 1
 
     #send message to let workers stop
@@ -149,9 +147,9 @@ if rank == 0:
 else:
     while True:
         cache=0
-        for j in range(100): ## 100 batch iterations in each chain
+        for j in range(100): ## 100 batch iterations
             dw1,dw2,dw3,db1,db2,db3 = gradient(subdata[:,0:42],subdata[:,43],w1_temp,w2_temp,w3_temp,b1_temp,b2_temp,b3_temp,50,1) ## batchsize=50, penalty parameter=1
-            cache += sum(dw1**2)+sum(dw2**2)+sum(dw3**2)+sum(db1**2)+sum(db2**2)+sum(db3**2)
+            cache += sum(map(sum, dw1**2))+sum(map(sum, dw2**2))+sum(map(sum, dw3**2))+sum(db1**2)+sum(db2**2)+sum(db3**2)
             eta_worker=eta/np.sqrt(cache)
             w1_temp = w1_temp - dw1*eta_worker
             w2_temp = w2_temp - dw2*eta_worker
