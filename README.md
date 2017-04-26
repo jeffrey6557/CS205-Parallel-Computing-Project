@@ -47,16 +47,13 @@ We implement a **fully connected** network with:
 
 ### Parallelism Architecture
 
-We execute data and model parallelism at two levels. Firstly, each machine (e.g. an Odyssey node) will store a Data Shard (a subset of data) and train a model replica independently and asynchronously (see Figure 1.) Each replica will fetch weights (w) from the parameter server (the master node), compute grad(w) with SGD, and push grad(w) to the server. The parameter server updates the parameter set whenever it receives grad(w) from a model replica. We implemented this level with MPI (mpi4py package).
-
-# *Continue from here*
+We execute data and model parallelism at two levels. Firstly, each machine (e.g. an Odyssey node) will store a Data Shard (a subset of data) and train a model replica independently and asynchronously (see Figure 1.) Each replica will fetch weights (𝑤) from the parameter server (the master node), compute ∆𝑤 with SGD, and push ∆𝑤 to the server. The parameter server updates the parameter set whenever it receives ∆𝑤 from a model replica. We implemented this level with MPI (`mpi4py` package).
 
 # Data and Model Parallelism 
 
 ![architecture_abstract](images/architecture_abstract.png)
 
-
-*Figure 1: Parallelised Neural Network Architecture [3]. Model replicas asynchronously fetch parameters w and push ∆𝑤 to the parameter server.*
+*Figure 1: Parallelised Neural Network Architecture [3]. Model replicas asynchronously fetch parameters 𝑤 and push ∆𝑤 to the parameter server.*
 
 Secondly, each model replica computes ∆𝑤 by averaging the mini-batch gradients from 64 or 32 (depend on number of cores in a node) parallel threads (see Figure 2). We implemented this level with OpenMP (Cython parallel module).
 
@@ -68,20 +65,22 @@ Secondly, each model replica computes ∆𝑤 by averaging the mini-batch gradie
 
 ### Preliminary Simulations
 
-We tested our two levels of parallelisations with **several simulations**. <span style="color:red"> **Explain bold part.** </span>
+We tested our two levels of parallelisations separately and then combined via simulation:
 
-Simulations: <span style="color:red"> **Change and re-order.** </span>
+##### Simulations:
 
 1. MPI accuracy
-2. OpenMP model replica vs CUDA
-3. Combined model:
-	
-	- We were unable to combine models so we ran MPI+?
+2. Parallelizable ANN algorithms within a model replica
+    i. Keras 
+    ii. Hessian-Free
+3. Combined models:
+    i. MPI + Keras
+    ii. MPI + Hessian-Free
 
-
+# *Continue from here*
 
 #### Performance metrics of simulations using MPI
-Firstly, we tested the correctness of MPI implementation with data generated from a simple linear model. We think this is a reasonable "naive" test case because an ANN without hidden layers reduces to a linear regressor when it has linear activation functions.
+First, we tested the correctness of MPI implementation with data generated from a simple linear model. We think this is a reasonable "naive" test case because an ANN without hidden layers reduces to a linear regressor when it has linear activation functions.
 
 ![loss](images/simulation_MPI_loss.png)
 *Figure 3: MPI simulation, loss function*
