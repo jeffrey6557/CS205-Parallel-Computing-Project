@@ -13,7 +13,7 @@ output_col=1
 DIETAG = 666
 n_iteration = 100
 EPSILON = 10**-5
-eta_mas = 0.001  ## learning rate
+eta = 0.01  ## learning rate
 
 def gradient(X,Y,w1,w2,w3,b1,b2,b3,batchsize,penalty):
     [nrow, ncol] = X.shape 
@@ -40,7 +40,7 @@ def gradient(X,Y,w1,w2,w3,b1,b2,b3,batchsize,penalty):
     db1 = T.grad(cost=cost, wrt=b01)
     db2 = T.grad(cost=cost, wrt=b12)
     db3 = T.grad(cost=cost, wrt=b23)    
-    train = theano.function(inputs=[x,y], outputs=[dw1,dw2,dw3,db1,db2,db3],name='train')
+    train = theano.function(inputs=[x,y], outputs=[dw1,dw2,dw3,db1,db2,db3],name='train',device=cuda)
     gw1,gw2,gw3,gb1,gb2,gb3=train(trainX,trainY)
     return [gw1,gw2,gw3,gb1,gb2,gb3]
 
@@ -114,12 +114,6 @@ dw3 = np.empty([num_neutron_2,output_col])
 db1 = np.empty(num_neutron_1)
 db2 = np.empty(num_neutron_2)
 db3 = np.empty(output_col)
-gw1 = np.empty([input_col,num_neutron_1])
-gw2 = np.empty([num_neutron_1,num_neutron_2])
-gw3 = np.empty([num_neutron_2,output_col])
-gb1 = np.empty(num_neutron_1)
-gb2 = np.empty(num_neutron_2)
-gb3 = np.empty(output_col)
 
 if rank == 0:
     iteration = 0
@@ -133,12 +127,13 @@ if rank == 0:
                 break
         status = MPI.Status()
         dw1,dw2,dw3,db1,db2,db3 = comm.recv(source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG,status=status)
-        w1 = w1 - dw1*eta_mas
-        w2 = w2 - dw2*eta_mas
-        w3 = w3 - dw3*eta_mas
-        b1 = b1 - db1*eta_mas
-        b2 = b2 - db2*eta_mas
-        b3 = b3 - db3*eta_mas
+        eta_master=eta/np.sqrt(sum(dw1**2)+sum(dw2**2)+sum(dw3**2)+sum(db1**2)+sum(db2**2)+sum(db3**2))
+        w1 = w1 - dw1*eta_master
+        w2 = w2 - dw2*eta_master
+        w3 = w3 - dw3*eta_master
+        b1 = b1 - db1*eta_master
+        b2 = b2 - db2*eta_master
+        b3 = b3 - db3*eta_master
         comm.send([w1,w2,w3,b1,b2,b3],dest=status.Get_source(),tag=0)
         print "dw from worker {}".format(status.Get_source())
     
@@ -151,50 +146,31 @@ if rank == 0:
 
 else:
     while True:
-        final_w1 = np.zeros([input_col,num_neutron_1])
-        final_w2 = np.zeros([num_neutron_1,num_neutron_2])
-        final_w3 = np.zeros([num_neutron_2,output_col])
-        final_b1 = np.zeros(num_neutron_1)
-        final_b2 = np.zeros(num_neutron_2)
-        final_b3 = np.zeros(output_col)
-        for i in range(64):  ## 64 threads, prange this part
-            w1_temp = w1
-            w2_temp = w2
-            w3_temp = w3
-            b1_temp = b1
-            b2_temp = b2
-            b3_temp = b3
-            for j in range(100): ## 100 batch iterations in each chain
-                gw1,gw2,gw3,gb1,gb2,gb3 = gradient(subdata[:,0:42],subdata[:,43],w1_temp,w2_temp,w3_temp,b1_temp,b2_temp,b3_temp,50,1) ## batchsize=50, penalty parameter=1
-                ## do some adjustment to learning rate... very small when the parameters are initialized
-                ## when the parameters are updated several times, the learning rate should be larger to accelerate convergence
-                ## maybe write learning rate as a function of loss
-                if j<20:
-                    eta=0.0000001
-                elif j<50:
-                    eta=0.000001
-                else:
-                    eta=0.00001
-                w1_temp = w1_temp - gw1*eta
-                w2_temp = w2_temp - gw2*eta
-                w3_temp = w3_temp - gw3*eta
-                b1_temp = b1_temp - gb1*eta
-                b2_temp = b2_temp - gb2*eta
-                b3_temp = b3_temp - gb3*eta
-            final_w1 = final_w1 +  w1_temp
-            final_w2 = final_w2 +  w2_temp
-            final_w3 = final_w3 +  w3_temp
-            final_b1 = final_b1 +  b1_temp
-            final_b2 = final_b2 +  b2_temp
-            final_b3 = final_b3 +  b3_temp
-            dw1 = final_w1/100 - w1
-            dw2 = final_w2/100 - w2
-            dw3 = final_w3/100 - w3
-            db1 = final_b1/100 - b1
-            db2 = final_b2/100 - b2
-            db3 = final_b3/100 - b3
+        cache=0
+        for j in range(100): ## 100 batch iterations in each chain
+            dw1,dw2,dw3,db1,db2,db3 = gradient(subdata[:,0:42],subdata[:,43],w1_temp,w2_temp,w3_temp,b1_temp,b2_temp,b3_temp,50,1) ## batchsize=50, penalty parameter=1
+            cache += sum(dw1**2)+sum(dw2**2)+sum(dw3**2)+sum(db1**2)+sum(db2**2)+sum(db3**2)
+            eta_worker=eta/np.sqrt(cache)
+            w1_temp = w1_temp - gw1*eta_worker
+            w2_temp = w2_temp - gw2*eta_worker
+            w3_temp = w3_temp - gw3*eta_worker
+            b1_temp = b1_temp - gb1*eta_worker
+            b2_temp = b2_temp - gb2*eta_worker
+            b3_temp = b3_temp - gb3*eta_worker
+        dw1 = w1_temp - w1
+        dw2 = w2_temp - w2
+        dw3 = w3_temp - w3
+        db1 = b1_temp - b1
+        db2 = b2_temp - b2
+        db3 = b3_temp - b3
     comm.send([dw1,dw2,dw3,db1,db2,db3], dest=0, tag=1)
-    status = MPI.Status(),subdata[:,3]
+    status = MPI.Status()
     w1,w2,w3,b1,b2,b3 = comm.recv(source=0,tag=MPI.ANY_TAG,status=status)
+    w1_temp = w1
+    w2_temp = w2
+    w3_temp = w3
+    b1_temp = b1
+    b2_temp = b2
+    b3_temp = b3
     if status.Get_tag() == DIETAG:
         break
