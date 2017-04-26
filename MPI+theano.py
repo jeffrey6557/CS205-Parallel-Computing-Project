@@ -71,7 +71,7 @@ def lossfunc(X,Y,w1,w2,w3,b1,b2,b3):
     loss = T.mean((y-L23)**2)
     f = theano.function(inputs=[x,y], outputs=[loss],name='f')
     Y = np.reshape(Y,[nrow,1])
-    loss = f(X,Y)
+    loss = np.asscalar(f(X,Y)[0])
     return loss
 
 if rank == 0:
