@@ -66,11 +66,14 @@ Secondly, each model replica computes ∆𝑤 by averaging the mini-batch gradie
 
 ## Model replica algorithms
 
-Due to the 
+Due to the lack of success in our OpenMP algorithm, we integrated the following `Python` packages and algorithms:
+
+- [Kera](https://keras.io)
+- Hessian-Free
+- **SOMETHING ELSE GOES HERE**
 
 # *Add figure of true architecture!!!*
 <!-- ![pragmatic architecture]() -->
-
 
 *Figure 2: Parallelisation in each model replica.*
 
@@ -90,7 +93,7 @@ We tested our two levels of parallelizations separately and then combined via si
     - MPI + Keras
     - MPI + Hessian-Free
 
-#### Performance metrics of simulations using MPI
+#### 1. MPI accuracy and performance
 
 First, we test the correctness of MPI implementation with data generated from a simple linear model. This is a reasonable *naïve* test case because ANN with zero hidden layers reduces to a linear regression if the activation function is linear.
 
