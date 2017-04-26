@@ -16,17 +16,15 @@ We formulate the task as a prediction problem, using lagged previous prices of i
 Specifically, the inputs are price and volume information at or before minute t for all stocks except stock j. 
 Technical indicators of price series includes:
 
- 1. Intra-interval proportions (IIP)
- 2. Exponential Moving Averages (EMA)
+ 1. Exponential Moving Averages (EMA) and Moving Averages (MA)
+ 2. Past k-period log returns
  3. Price Trend indicators (AD, Adv, ADR)
- 4. Others (see Appendix)
-
-The output is the predicted price at minute t+1 for stock j.
-
-We normalize all the input and output variables:
-
-1. For stock price, use returns = percentage change
-2. For other values, use min-max scaling: RN = (R-R_min) / (R_max – R_min) where R is the value of an input
+ 4. Price and returns volatility over k periods
+ 5. Momentum: Change in price in k periods
+ 6. Disparity: last available price over MA
+ 7. PSY: fraction of upward movement in the past k-period
+ 
+The output is the predicted return at minute t+1 for stock j. We normalize all the input and output variables using z-score and unit norm per feature:
 
 ## Methodology and Parallelisation
 
@@ -42,12 +40,11 @@ We implement a **fully connected** network with:
 
 # *are some parts below true?*
 
-1. L = 1 to 10 layers
-2. number of neurons = 4 to 64 per layer; fewer neurons in deeper layers (pyramidal architecture)
+1. L = 4 layers
+2. number of neurons = 42,24,12,1; fewer neurons in deeper layers (pyramidal architecture)
 3. Optimizer ADAM learning rate, other parameters such as momentum 
 4. ReLu/MSE activation, linear activation for output node
-5. L2 regularization, early stopping, dropouts
-
+5. L2 and maxnorm regularization, early stopping(patience=5), dropouts(20%)
 
 ### Parallelism Architecture
 
@@ -66,14 +63,11 @@ Secondly, each model replica computes ∆𝑤 by averaging the mini-batch gradie
 
 ## Model replica algorithms
 
-Due to the lack of success in our OpenMP algorithm, we integrated the following `Python` packages and algorithms:
-
-- [Kera](https://keras.io)
-- Hessian-Free
-- **SOMETHING ELSE GOES HERE**
+Due to the 
 
 # *Add figure of true architecture!!!*
 <!-- ![pragmatic architecture]() -->
+
 
 *Figure 2: Parallelisation in each model replica.*
 
@@ -85,15 +79,16 @@ We tested our two levels of parallelizations separately and then combined via si
 
 1. MPI accuracy
 2. Parallelizable ANN algorithms within a model replica
-
-    - Keras
+    - SGD
+    - Adam 
+    - Adagrad
     - Hessian-Free (Truncated Newton Method) *(more to come)*
 3. Combined models:
-    
-    - MPI + Keras
+    - MPI + SGD
+    - MPI + Adam + Adagrad
     - MPI + Hessian-Free
 
-#### 1. MPI accuracy and performance
+#### Performance metrics of simulations using MPI
 
 First, we test the correctness of MPI implementation with data generated from a simple linear model. This is a reasonable *naïve* test case because ANN with zero hidden layers reduces to a linear regression if the activation function is linear.
 
