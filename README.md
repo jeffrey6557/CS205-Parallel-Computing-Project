@@ -1,7 +1,7 @@
 
-# CS 205 FINAL PROJECT INTERIM PROGRESS REPORT 
+# CS 205 FINAL PROJECT REPORT 
 
-URL: https://jeffrey6557.github.io/CS205-Parallel-Computing-Project/
+<!-- URL: https://jeffrey6557.github.io/CS205-Parallel-Computing-Project/ -->
 
 ## Parallelizing Neural Network with Improved Performance 
 Chang Liu, Greyson Liu, Kamrine Poels, Linglin Huang
@@ -28,32 +28,34 @@ We normalize all the input and output variables:
 1. For stock price, use returns = percentage change
 2. For other values, use min-max scaling: RN = (R-R_min) / (R_max – R_min) where R is the value of an input
 
-
 ## Methodology and Parallelisation
 
 ### Neural Network Architecture
 
-For the prediction method, multi-layer Artificial Neural Networks (ANN) using back-propagation algorithm has shown promising results in stock index prices compared with traditional methods [1]. Note that the traditional gradient descent algorithm of back-propagation is sequential by nature. We will therefore apply a technique that combines MPI and OpenMP to parallelize the training process: asynchronized multiple sub-neural networks[3] with nested parallel batch Stochastic Gradient Descent[2]. 
-
+For the prediction method, multi-layer Artificial Neural Networks (ANN) using back-propagation algorithm has shown promising results in stock index prices compared with traditional methods [1]. Note that the traditional gradient descent algorithm of back-propagation is sequential by nature. We will therefore apply a technique that combines MPI with **three differerent parallelizable algorithms** to parallelize the training process: asynchronized multiple sub-neural networks[3] with nested parallel batch Stochastic Gradient Descent[2]. 
 
 ### Neural Network Architecture (hyperparameters)
 
-We implemented a **fully connected** network with:
+We implement a **fully connected** network with:
 
-1.	L = 1 to 10 layers
-2.	number of neurons = 4~64/layer; fewer neurons in deeper layers (pyramidal architecture)
-3.	Optimizer ADAM learning rate, other parameters such as momentum 
-4.	ReLu/MSE activation, linear activation for output node
+1. L = 1 to 10 layers
+2. number of neurons = 4 to 64 per layer; fewer neurons in deeper layers (pyramidal architecture)
+3. Optimizer ADAM learning rate, other parameters such as momentum 
+4. ReLu/MSE activation, linear activation for output node
 5. L2 regularization, early stopping, dropouts
 
 
 ### Parallelism Architecture
 
-We execute data and model parallelism at two levels. Firstly, each machine (e.g. an Odyssey node) will store a Data Shard (a subset of data) and train a model replica independently and asynchronously (see Figure 1.) Each replica fetch weights (w) from the parameter server (the master node), compute grad(w) with SGD, and push grad(w) to the server. The parameter server updates the parameter set whenever it receives grad(w) from a model replica. We implemented this level with MPI (mpi4py package).
+We execute data and model parallelism at two levels. Firstly, each machine (e.g. an Odyssey node) will store a Data Shard (a subset of data) and train a model replica independently and asynchronously (see Figure 1.) Each replica will fetch weights (w) from the parameter server (the master node), compute grad(w) with SGD, and push grad(w) to the server. The parameter server updates the parameter set whenever it receives grad(w) from a model replica. We implemented this level with MPI (mpi4py package).
+
+# *Continue from here*
 
 # Data and Model Parallelism 
 
 ![architecture_abstract](images/architecture_abstract.png)
+
+
 *Figure 1: Parallelised Neural Network Architecture [3]. Model replicas asynchronously fetch parameters w and push ∆𝑤 to the parameter server.*
 
 Secondly, each model replica computes ∆𝑤 by averaging the mini-batch gradients from 64 or 32 (depend on number of cores in a node) parallel threads (see Figure 2). We implemented this level with OpenMP (Cython parallel module).
@@ -84,7 +86,7 @@ Firstly, we tested the correctness of MPI implementation with data generated fro
 ![loss](images/simulation_MPI_loss.png)
 *Figure 3: MPI simulation, loss function*
 
-![beta](images/simulation_MPI_beta.png)
+![beta](images/simulation_MPI_beta\ copy.png)
 *Figure 4: MPI simulation, speed up/thoughput*
 
 <span style="color:red"> **Can we make these images smaller to match rest of figures???** </span>
@@ -150,8 +152,7 @@ We evaluate our model with the following metrics:
     - MSE 
     - MSPE
     - Directional Accuracy (fraction of correct predictions of up and downs per model, consider thresholded on predicted values such that only large predicted values count)
-    - Hit ratio = mean( $p_i$ ) where $p_i= 1\{(y-By)(\hat{y}-B\hat{y})>0\}$ where y is the true value $\hat{y}$ are predicted value and B is the lag operator 
-    <span style="color:red"> **Need to fix this** </span>
+    - Hit ratio
 
 <span style="color:red"> **Add figures for exercise 2 and 4.** </span>
 
