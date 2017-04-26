@@ -70,12 +70,13 @@ We tested our two levels of parallelizations separately and then combined via si
 1. MPI accuracy
 2. Parallelizable ANN algorithms within a model replica
 
-    i. [Keras](https://keras.io)
-    ii. Hessian-Free (Truncated Newton Method) *(more to come)*
+    (i) [Keras](https://keras.io)
+
+    (ii) Hessian-Free (Truncated Newton Method) *(more to come)*
 3. Combined models:
     
-    i. MPI + Keras
-    ii. MPI + Hessian-Free
+    (i) MPI + Keras
+    (ii) MPI + Hessian-Free
 
 #### Performance metrics of simulations using MPI
 First, we test the correctness of MPI implementation with data generated from a simple linear model. This is a reasonable *naïve* test case because ANN with zero hidden layers reduces to a linear regression if the activation function is linear.
@@ -86,7 +87,7 @@ First, we test the correctness of MPI implementation with data generated from a 
 
 ![beta](images/simulation_MPI_beta.png)
 
-*Figure 4: Convergence of parameters. All three parameters converged to their true values, respectively. *
+*Figure 4: Convergence of parameters. All three parameters converged to their true values, respectively.*
 
 The decrease in the loss between predicted and observed outcomes and the convergence to the true value demonstrate that our MPI algorithm operates correctly.
 
