@@ -8,7 +8,6 @@ num_neutron_2 = 12
 output_col=1 
 eta=1
 
-THEANO_FLAGS='cuda.root=/path/to/cuda/root,device=cuda,floatX=float64'
 def gradient(X,Y,w1,w2,w3,b1,b2,b3,batchsize,penalty):
     [nrow, ncol] = X.shape 
     index = np.random.choice(range(nrow),size=batchsize,replace=False)
