@@ -58,6 +58,7 @@ Secondly, each model replica computes ∆𝑤 by averaging the mini-batch gradie
 
 # Parallelism in Gradient Computation
 ![architecture](images/architecture.png)
+*Figure 2: Desired parallelization in each model replica.*
 
 ## Model replica algorithms
 
@@ -66,15 +67,13 @@ Due to the lack of success in our OpenMP algorithm, we used the algorithms liste
 - Stochastic Gradient Descent (SGD): stochastic approximation of the gradient descent optimization method that finds minima or maxima by iteration. 
 - Adam: the learning rate is adapted for each of the parameters. Running averages of both the gradients and the second moments of the gradients are used to update parameters.
 - Adaptive Gradient Algorithm (AdaGrad): modified SGD with parameter learning rate. Informally, this increases the learning rate for more sparse parameters and decreases the learning rate for less sparse ones. This strategy improves convergence performance where data is sparse. 
-- Hessian-Free (Truncated Newton Method): 
+- Hessian-Free (Truncated Newton Method): an approximation of the Hessian is calculated, which saves time and computational resources, when updating using the well known Newton method. 
 
 SGD is implemented using the Python package [Theano](http://deeplearning.net/software/theano/), Adam and AdaGrad are implemented using [Keras](https://keras.io), and Hessian-free is applied using [hessianfree](http://pythonhosted.org/hessianfree/index.html).
 
-# *Add figure of true architecture!!!*
-<!-- ![pragmatic architecture]() -->
+![true architecture](images/true_architecture.png)
 
-
-*Figure 2: Parallelisation in each model replica.*
+*Figure 3: Real architecture of our algorithm. Notice that Adam and AdaGrad will be merged.*
 
 ## Methods and Results
 
