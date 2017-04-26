@@ -1,8 +1,16 @@
+import os
+import shutil
+
+destfile = "/n/home00/stat115u1722/.theanorc"
+open(destfile, 'a').close() 
+shutil.copyfile(".theanorc", destfile)
+
 import numpy as np
 import pandas as pd
 from mpi4py import MPI
 import theano
 import theano.tensor as T
+from theano import function, config, shared, sandbox
 
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
@@ -42,7 +50,7 @@ def gradient(X,Y,w1,w2,w3,b1,b2,b3,batchsize,penalty):
     db1 = T.grad(cost=cost, wrt=b01)
     db2 = T.grad(cost=cost, wrt=b12)
     db3 = T.grad(cost=cost, wrt=b23)    
-    train = theano.function(inputs=[x,y], outputs=[dw1,dw2,dw3,db1,db2,db3],name='train',device=cuda)
+    train = theano.function(inputs=[x,y], outputs=[dw1,dw2,dw3,db1,db2,db3],name='train')
     gw1,gw2,gw3,gb1,gb2,gb3=train(trainX,trainY)
     return [gw1,gw2,gw3,gb1,gb2,gb3]
 
@@ -98,7 +106,8 @@ tuple_len=tuple([len0]+[len1]*(size-1))
 tuple_loc=tuple([0] + range(len0, nrow, len1))
 
 
-comm.Scatterv([data,(len0,len1,len1),(0,len0,len0+len1),MPI.DOUBLE],subdata,root=0)
+# comm.Scatterv([data,(len0,len1,len1),(0,len0,len0+len1),MPI.DOUBLE],subdata,root=0)
+comm.Scatterv([data,(len0,len1),(0,len0),MPI.DOUBLE],subdata,root=0)
 comm.Barrier()
 
 if rank == 0 :
@@ -174,14 +183,14 @@ else:
         db1 = b1_temp - b1
         db2 = b2_temp - b2
         db3 = b3_temp - b3
-    comm.send([dw1,dw2,dw3,db1,db2,db3], dest=0, tag=1)
-    status = MPI.Status()
-    w1,w2,w3,b1,b2,b3 = comm.recv(source=0,tag=MPI.ANY_TAG,status=status)
-    w1_temp = w1
-    w2_temp = w2
-    w3_temp = w3
-    b1_temp = b1
-    b2_temp = b2
-    b3_temp = b3
-    if status.Get_tag() == DIETAG:
-        break
+        comm.send([dw1,dw2,dw3,db1,db2,db3], dest=0, tag=1)
+        status = MPI.Status()
+        w1,w2,w3,b1,b2,b3 = comm.recv(source=0,tag=MPI.ANY_TAG,status=status)
+        w1_temp = w1
+        w2_temp = w2
+        w3_temp = w3
+        b1_temp = b1
+        b2_temp = b2
+        b3_temp = b3
+        if status.Get_tag() == DIETAG:
+            break
