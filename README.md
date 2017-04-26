@@ -38,8 +38,6 @@ The initial goal of our project was to implement a two-level parallelization mod
 
 We implement a **fully connected** network with:
 
-# *are some parts below true?*
-
 1. L = 4 layers
 2. number of neurons = 42,24,12,1; fewer neurons in deeper layers (pyramidal architecture)
 3. Optimizer ADAM learning rate, other parameters such as momentum 
@@ -63,7 +61,14 @@ Secondly, each model replica computes ∆𝑤 by averaging the mini-batch gradie
 
 ## Model replica algorithms
 
-Due to the 
+Due to the lack of success in our OpenMP algorithm, we used the algorithms listed below. 
+
+- Stochastic Gradient Descent (SGD): stochastic approximation of the gradient descent optimization method that finds minima or maxima by iteration. 
+- Adam: the learning rate is adapted for each of the parameters. Running averages of both the gradients and the second moments of the gradients are used to update parameters.
+- Adaptive Gradient Algorithm (AdaGrad): modified SGD with parameter learning rate. Informally, this increases the learning rate for more sparse parameters and decreases the learning rate for less sparse ones. This strategy improves convergence performance where data is sparse. 
+- Hessian-Free (Truncated Newton Method): 
+
+SGD is implemented using the Python package [Theano](http://deeplearning.net/software/theano/), Adam and AdaGrad are implemented using [Keras](https://keras.io), and Hessian-free is applied using [hessianfree](http://pythonhosted.org/hessianfree/index.html).
 
 # *Add figure of true architecture!!!*
 <!-- ![pragmatic architecture]() -->
@@ -81,11 +86,11 @@ We tested our two levels of parallelizations separately and then combined via si
 2. Parallelizable ANN algorithms within a model replica
     - SGD
     - Adam 
-    - Adagrad
-    - Hessian-Free (Truncated Newton Method) *(more to come)*
+    - AdaGrad
+    - Hessian-Free
 3. Combined models:
     - MPI + SGD
-    - MPI + Adam + Adagrad
+    - MPI + Adam + AdaGrad
     - MPI + Hessian-Free
 
 #### Performance metrics of simulations using MPI
@@ -104,7 +109,15 @@ The decrease in the loss between predicted and observed outcomes and the converg
 
 #### Performance Metrics of a Model Replica
 
-# *Stop*
+##### SGD
+
+##### Adam
+
+![]()
+
+##### AdaGrad
+
+##### Hessian-Free
 
 <!-- Secondly, we tested the performance of a single model replica using OpenMP versus CUDA implementation on predicting minute-level stock returns of Goldman Sachs in 2016. We trained a fully-connected neural network with 4 layers (# units = [42,24,12,1]) and stop training once validation is not improving for 5 epochs. For speedup experiments, epochs are set to 100. 
 
@@ -128,7 +141,7 @@ Because of the time series nature of the high-frequency data, we employ a walk-f
 *Figure 6: Walk-forward method for time series prediction.*
 
 
-The walk-foward method is implemented as follows: 
+The walk-forward method is implemented as follows: 
 
 ```python
 # Input: define data[0 : T-1], training_size, validation_size, test_size, window_size

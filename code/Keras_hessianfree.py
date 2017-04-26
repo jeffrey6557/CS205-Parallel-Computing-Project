@@ -151,17 +151,6 @@ X_tr,X_val,ret_tr,ret_val = X_tr_temp[:-n_val], X_tr_temp[-n_val:],ret_tr_temp[:
 
 
 
-# read data and generate training, validation and test set
-data = np.genfromtxt('second_level_inputs_GS2016.csv',delimiter=',',skip_header=1)
-X,ret = data[:,2:],data[:,1:2] # X means features, ret means target 
-print 'shape of total X and ret:',X.shape,ret.shape
-
-n_test = int(X.shape[0]*0.25)
-N = X.shape[0] - n_test
-n_val = int(N*0.2)
-X_tr_temp, X_test, ret_tr_temp,ret_test = X[:-n_test],X[-n_test:],ret[:-n_test],ret[-n_test:]
-X_tr,X_val,ret_tr,ret_val = X_tr_temp[:-n_val], X_tr_temp[-n_val:],ret_tr_temp[:-n_val],ret_tr_temp[-n_val:]
-
 # run some number of trials for each model
 n_trials = 2
 n_nodes = [42,24,12,1] # number of units per layer
