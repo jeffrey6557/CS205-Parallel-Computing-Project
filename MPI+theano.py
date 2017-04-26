@@ -150,12 +150,12 @@ if rank == 0:
         status = MPI.Status()
         dw1,dw2,dw3,db1,db2,db3 = comm.recv(source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG,status=status)
         eta_master=eta/np.sqrt(sum(map(sum, dw1**2))+sum(map(sum, dw2**2))+sum(map(sum, dw3**2))+sum(db1**2)+sum(db2**2)+sum(db3**2))
-        w1 = w1 - dw1*eta_master
-        w2 = w2 - dw2*eta_master
-        w3 = w3 - dw3*eta_master
-        b1 = b1 - db1*eta_master
-        b2 = b2 - db2*eta_master
-        b3 = b3 - db3*eta_master
+        w1 = w1 + dw1*eta_master
+        w2 = w2 + dw2*eta_master
+        w3 = w3 + dw3*eta_master
+        b1 = b1 + db1*eta_master
+        b2 = b2 + db2*eta_master
+        b3 = b3 + db3*eta_master
         comm.send([w1,w2,w3,b1,b2,b3],dest=status.Get_source(),tag=0)
         print "dw from worker {}".format(status.Get_source())
         iteration += 1
