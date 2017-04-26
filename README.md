@@ -64,10 +64,13 @@ Secondly, each model replica computes ∆𝑤 by averaging the mini-batch gradie
 Due to the lack of success in our OpenMP algorithm, we used the algorithms listed below. 
 
 - Stochastic Gradient Descent (SGD)
+    
     Stochastic approximation of the gradient descent optimization method that finds minima or maxima by iteration. 
 - Adam
+    
     The learning rate is adapted for each of the parameters. Running averages of both the gradients and the second moments of the gradients are used
 - Adaptive Gradient Algorithm (AdaGrad)
+    
     Modified SGD with parameter learning rate. Informally, this increases the learning rate for more sparse parameters and decreases the learning rate for less sparse ones. This strategy improves convergence performance where data is sparse. 
 - Hessian-Free (Truncated Newton Method)
 
