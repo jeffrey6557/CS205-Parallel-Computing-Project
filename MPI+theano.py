@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 from mpi4py import MPI
+import theano
+import theano.tensor as T
 
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
@@ -151,12 +153,12 @@ else:
             dw1,dw2,dw3,db1,db2,db3 = gradient(subdata[:,0:42],subdata[:,43],w1_temp,w2_temp,w3_temp,b1_temp,b2_temp,b3_temp,50,1) ## batchsize=50, penalty parameter=1
             cache += sum(dw1**2)+sum(dw2**2)+sum(dw3**2)+sum(db1**2)+sum(db2**2)+sum(db3**2)
             eta_worker=eta/np.sqrt(cache)
-            w1_temp = w1_temp - gw1*eta_worker
-            w2_temp = w2_temp - gw2*eta_worker
-            w3_temp = w3_temp - gw3*eta_worker
-            b1_temp = b1_temp - gb1*eta_worker
-            b2_temp = b2_temp - gb2*eta_worker
-            b3_temp = b3_temp - gb3*eta_worker
+            w1_temp = w1_temp - dw1*eta_worker
+            w2_temp = w2_temp - dw2*eta_worker
+            w3_temp = w3_temp - dw3*eta_worker
+            b1_temp = b1_temp - db1*eta_worker
+            b2_temp = b2_temp - db2*eta_worker
+            b3_temp = b3_temp - db3*eta_worker
         dw1 = w1_temp - w1
         dw2 = w2_temp - w2
         dw3 = w3_temp - w3

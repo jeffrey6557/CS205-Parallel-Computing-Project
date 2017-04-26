@@ -1,11 +1,12 @@
 import numpy as np
 import pandas as pd
-from mpi4py import MPI
+import theano
+import theano.tensor as T
 input_col = 42
 num_neutron_1 = 24
 num_neutron_2 = 12
 output_col=1 
-eta=0.1
+eta=1
 
 def gradient(X,Y,w1,w2,w3,b1,b2,b3,batchsize,penalty):
     [nrow, ncol] = X.shape 
@@ -32,35 +33,37 @@ def gradient(X,Y,w1,w2,w3,b1,b2,b3,batchsize,penalty):
     db1 = T.grad(cost=cost, wrt=b01)
     db2 = T.grad(cost=cost, wrt=b12)
     db3 = T.grad(cost=cost, wrt=b23)    
-    train = theano.function(inputs=[x,y], outputs=[loss,dw1,dw2,dw3,db1,db2,db3],name='train',device=cuda)
+    train = theano.function(inputs=[x,y], outputs=[loss,dw1,dw2,dw3,db1,db2,db3],name='train')
     loss,gw1,gw2,gw3,gb1,gb2,gb3=train(trainX,trainY)
-    return [gw1,gw2,gw3,gb1,gb2,gb3]
+    return [loss,gw1,gw2,gw3,gb1,gb2,gb3]
 
 data = pd.read_csv("test_data.csv",header=-1)
+data = np.array(data)
 w1 = np.ones([input_col,num_neutron_1])
 w2 = np.ones([num_neutron_1,num_neutron_2])
 w3 = np.ones([num_neutron_2,output_col])
 b1 = np.zeros(num_neutron_1)
 b2 = np.zeros(num_neutron_2)
 b3 = np.zeros(output_col)
-dw1 = np.empty([input_col,num_neutron_1])
-dw2 = np.empty([num_neutron_1,num_neutron_2])
-dw3 = np.empty([num_neutron_2,output_col])
-db1 = np.empty(num_neutron_1)
-db2 = np.empty(num_neutron_2)
-db3 = np.empty(output_col)
+dw1 = np.ones([input_col,num_neutron_1])
+dw2 = np.ones([num_neutron_1,num_neutron_2])
+dw3 = np.ones([num_neutron_2,output_col])
+db1 = np.ones(num_neutron_1)
+db2 = np.ones(num_neutron_2)
+db3 = np.ones(output_col)
 
 cache=0
-loss_vec=[]
-for i in range(100):
-	loss,dw1,dw2,dw3,db1,db2,db3 = gradient(data[:,0:42],data[:,43],w1,w2,w3,b1,b2,b3,50,1)
-	cache += sum(dw1**2)+sum(dw2**2)+sum(dw3**2)+sum(db1**2)+sum(db2**2)+sum(db3**2)
-	eta_worker=eta/np.sqrt(cache)
-    w1 = w1 - dw1*eta_worker
-    w2 = w2 - dw2*eta_worker
-    w3 = w3 - dw3*eta_worker
-    b1 = b1 - db1*eta_worker
-    b2 = b2 - db2*eta_worker
-    b3 = b3 - db3*eta_worker
-    loss_vec.append(loss)
- print(loss_vec)
+k=10
+loss_vec=np.empty(k)
+for i in range(k):
+    loss,dw1,dw2,dw3,db1,db2,db3 = gradient(data[:,0:42],data[:,43],w1,w2,w3,b1,b2,b3,50,1)
+    cache += sum(map(sum, dw1**2))+sum(map(sum, dw2**2))+sum(map(sum, dw3**2))+sum(db1**2)+sum(db2**2)+sum(db3**2)
+    eta_worker=eta/np.sqrt(cache)
+    w1 = w1-dw1*eta_worker
+    w2 = w2-dw2*eta_worker
+    w3 = w3-dw3*eta_worker
+    b1 = b1-db1*eta_worker
+    b2 = b2-db2*eta_worker
+    b3 = b3-db3*eta_worker
+    loss_vec[i]=loss
+print(loss_vec)
