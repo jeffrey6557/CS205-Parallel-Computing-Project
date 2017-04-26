@@ -1,0 +1,361 @@
+experiment 5
+
+setting same as experiment 4 except 
+
+run 100 models on the same training set (no bootstrap) 
+ 
+
+
+Training time 50.6473898888 seconds.
+Loss_tr: [1.8565986384470901, 1.3239827679920342, 1.2728384304264235, 1.2543014094276901, 1.2431971631179293, 1.2434866641889115, 1.2337636273708699, 1.2343376214621122, 1.228885080857111, 1.2261946665225139, 1.2230242990334257, 1.2255172593347534, 1.2223029185070566, 1.2199371667619701, 1.2219038304099248, 1.2240038319176583, 1.2220865200396802, 1.2201982689757986, 1.2205267110409561, 1.2214158909343606, 1.2210483213789787, 1.2203229649293825, 1.218437926041988, 1.2197532221797474, 1.2170640082047686, 1.218265132415296, 1.2169333548406749, 1.2181469764381767, 1.2189893537215466]
+Validation loss [0.50725702151040053, 0.48672196095470965, 0.48247544679887922, 0.4802939276402608, 0.47584187540304157, 0.4753273737851999, 0.47458112093678173, 0.47323109045818595, 0.47277888722449296, 0.47225497672054556, 0.47321446340128409, 0.47352339773020247, 0.47238076152987296, 0.47216602297360594, 0.47184216266480333, 0.47183303004446003, 0.47191100200607344, 0.47159954490782446, 0.47221840156309369, 0.47215548556991516, 0.47221884193346358, 0.47232599006216563, 0.4708014606097829, 0.47243258143695804, 0.47101744738418283, 0.4710941632309919, 0.47188116535244973, 0.47208946031816373, 0.47121473297697025]
+Training time 22.6446750164 seconds.
+Training time 24.2679159641 seconds.
+Training time 36.7490210533 seconds.
+Training time 21.143627882 seconds.
+Training time 21.1240677834 seconds.
+Training time 38.4175410271 seconds.
+Training time 11.1236889362 seconds.
+Training time 27.2937829494 seconds.
+Training time 22.7961378098 seconds.
+Training time 27.430546999 seconds.
+Training time 9.74059295654 seconds.
+Training time 28.9052050114 seconds.
+Training time 31.5329778194 seconds.
+Training time 17.5621590614 seconds.
+Training time 37.7069787979 seconds.
+Training time 12.0855438709 seconds.
+Training time 14.051710844 seconds.
+Training time 23.9224998951 seconds.
+Training time 18.5956571102 seconds.
+Training time 23.6532108784 seconds.
+Training time 20.4635400772 seconds.
+Training time 27.6796679497 seconds.
+Training time 17.5781881809 seconds.
+Training time 21.848334074 seconds.
+Training time 16.8964099884 seconds.
+Training time 19.2167768478 seconds.
+Training time 33.4678528309 seconds.
+Training time 17.8752861023 seconds.
+Training time 37.4949731827 seconds.
+Training time 37.3368430138 seconds.
+Training time 30.5397601128 seconds.
+Training time 31.7861959934 seconds.
+Training time 13.0253679752 seconds.
+Training time 13.9709169865 seconds.
+Training time 18.1739768982 seconds.
+Training time 32.7887768745 seconds.
+Training time 13.3783128262 seconds.
+Training time 37.3980381489 seconds.
+Training time 15.1582181454 seconds.
+Training time 14.0043418407 seconds.
+Training time 27.5385529995 seconds.
+Training time 9.81990695 seconds.
+Training time 13.556563139 seconds.
+Training time 18.9008560181 seconds.
+Training time 33.7196609974 seconds.
+Training time 15.5908651352 seconds.
+Training time 17.8378977776 seconds.
+Training time 28.2138390541 seconds.
+Training time 21.7576909065 seconds.
+Training time 28.8764719963 seconds.
+Training time 33.6984469891 seconds.
+Training time 24.345220089 seconds.
+Training time 13.3989138603 seconds.
+Training time 22.3741071224 seconds.
+Training time 24.4546468258 seconds.
+Training time 18.460652113 seconds.
+Training time 26.8699250221 seconds.
+Training time 19.8165700436 seconds.
+Training time 18.7778289318 seconds.
+Training time 21.8558330536 seconds.
+Training time 25.3495271206 seconds.
+Training time 31.6826558113 seconds.
+Training time 33.8992900848 seconds.
+Training time 28.5604150295 seconds.
+Training time 28.5953030586 seconds.
+Training time 31.4455258846 seconds.
+Training time 24.8333969116 seconds.
+Training time 16.9063570499 seconds.
+Training time 21.1219630241 seconds.
+Training time 28.9382410049 seconds.
+Training time 16.9050340652 seconds.
+Training time 16.528660059 seconds.
+Training time 19.8177189827 seconds.
+Training time 18.5813691616 seconds.
+Training time 28.353317976 seconds.
+Training time 22.4667670727 seconds.
+Training time 26.1194839478 seconds.
+Training time 14.3404860497 seconds.
+Training time 13.974642992 seconds.
+Training time 15.6183540821 seconds.
+Training time 25.941065073 seconds.
+Training time 15.2540919781 seconds.
+Training time 24.648651123 seconds.
+Training time 14.0207269192 seconds.
+Training time 32.4095220566 seconds.
+Training time 23.6537690163 seconds.
+Training time 14.9284119606 seconds.
+Training time 34.1110239029 seconds.
+Training time 22.8204631805 seconds.
+Training time 14.3538179398 seconds.
+Training time 18.1954140663 seconds.
+Training time 10.4916369915 seconds.
+Training time 21.1166820526 seconds.
+Training time 22.2502069473 seconds.
+Training time 11.7428929806 seconds.
+Training time 27.858645916 seconds.
+Training time 31.7343640327 seconds.
+Training time 22.3050971031 seconds.
+Training time 18.2167508602 seconds.
+avg time and interval 23.014329021 10.7918616652 37.6062761307
+accuracy
+mean 0.546966774286
+conf interval [0.464853488087,0.582913073685]
+hit_ratio
+mean 0.453205002452
+conf interval [0.240439553703,0.577293812326]
+mean_squared_error
+mean 1.01342121001
+conf interval [0.813894026506,2.28853124682]
+mean_absolute_error
+mean 0.590753553697
+conf interval [0.477176257547,1.09439720138]
+
+
+# openmp 16 cores
+
+Training time 52.0939030647 seconds.
+Loss_tr: [1.465711497256921, 1.2611161492934826, 1.2310600711910136, 1.2290050838494884, 1.2274734948929686, 1.2244584724774696, 1.2246421683028885, 1.223748395111766, 1.2201192944961297, 1.2219706326350106, 1.2199525327048115, 1.2195518038443653, 1.2196347306264581, 1.2190224846599274, 1.219414723028672, 1.2190414082562091, 1.2188580066368078, 1.218611962520979, 1.2182235148247489, 1.2195392620281962, 1.2181251704817679, 1.2186638765690556, 1.21880548718754, 1.2196609857513636, 1.2181760462061133, 1.2173554665434132, 1.2181709460430894, 1.2182676895841653, 1.2179004946194192, 1.2178164088407555]
+Validation loss [0.48839879193477137, 0.47652629642864636, 0.47448609622880361, 0.47412058911006216, 0.47370540022273516, 0.4732317363044139, 0.47264849100667672, 0.47238093123320019, 0.4718503557436392, 0.47207759168181984, 0.47227071455133829, 0.47264564356843847, 0.47215625817294538, 0.47168767774602827, 0.47192738712438892, 0.47166680154500951, 0.47152442079856782, 0.47103296998297273, 0.47129507539350424, 0.47092203884113065, 0.47103925262352692, 0.47063241981532722, 0.4704423690108559, 0.47034127983781576, 0.47060210619056575, 0.4703662353618846, 0.47066931805017248, 0.47065470703583095, 0.47053912643531748, 0.47050550153523257]
+Training time 30.1458389759 seconds.
+Training time 17.1004498005 seconds.
+Training time 15.5534760952 seconds.
+Training time 21.2989881039 seconds.
+Training time 27.01466012 seconds.
+Training time 19.0688681602 seconds.
+Training time 32.0746581554 seconds.
+Training time 14.5514028072 seconds.
+Training time 19.6170148849 seconds.
+Training time 22.7822229862 seconds.
+Training time 16.2148308754 seconds.
+Training time 13.8636980057 seconds.
+Training time 23.3510100842 seconds.
+Training time 15.6573810577 seconds.
+Training time 31.4130749702 seconds.
+Training time 32.425590992 seconds.
+Training time 13.9823310375 seconds.
+Training time 13.969848156 seconds.
+Training time 8.71777677536 seconds.
+Training time 25.3571999073 seconds.
+Training time 30.4897248745 seconds.
+Training time 12.3011059761 seconds.
+Training time 32.1853840351 seconds.
+Training time 17.2259640694 seconds.
+Training time 22.0080411434 seconds.
+Training time 17.2571260929 seconds.
+Training time 31.899420023 seconds.
+Training time 15.8088459969 seconds.
+Training time 23.8838529587 seconds.
+Training time 15.6950819492 seconds.
+Training time 15.5709550381 seconds.
+Training time 28.8825280666 seconds.
+Training time 16.1022360325 seconds.
+Training time 9.29144001007 seconds.
+Training time 10.7969498634 seconds.
+Training time 18.3867051601 seconds.
+Training time 31.1811821461 seconds.
+Training time 14.4092171192 seconds.
+Training time 31.8554229736 seconds.
+Training time 31.0189931393 seconds.
+Training time 21.2593140602 seconds.
+Training time 17.2391149998 seconds.
+Training time 20.6464030743 seconds.
+Training time 27.7428679466 seconds.
+Training time 31.7003819942 seconds.
+Training time 19.303413868 seconds.
+Training time 19.84760499 seconds.
+Training time 19.0085840225 seconds.
+Training time 31.7066440582 seconds.
+Training time 8.98194408417 seconds.
+Training time 11.1261041164 seconds.
+Training time 25.0617160797 seconds.
+Training time 21.6637880802 seconds.
+Training time 17.6764469147 seconds.
+Training time 28.1744761467 seconds.
+Training time 24.5027041435 seconds.
+Training time 22.2187280655 seconds.
+Training time 19.8020670414 seconds.
+Training time 28.7105531693 seconds.
+Training time 19.1261849403 seconds.
+Training time 18.4787421227 seconds.
+Training time 22.578166008 seconds.
+Training time 15.5306048393 seconds.
+Training time 24.1629559994 seconds.
+Training time 31.7900290489 seconds.
+Training time 32.2310688496 seconds.
+Training time 23.6076698303 seconds.
+Training time 31.8053040504 seconds.
+Training time 19.2503781319 seconds.
+Training time 17.3470499516 seconds.
+Training time 25.0689370632 seconds.
+Training time 21.1497039795 seconds.
+Training time 19.2134048939 seconds.
+Training time 16.5788538456 seconds.
+Training time 12.6407029629 seconds.
+Training time 19.1559798717 seconds.
+Training time 15.8922920227 seconds.
+Training time 18.5656180382 seconds.
+Training time 30.0983030796 seconds.
+Training time 7.6069920063 seconds.
+Training time 18.9180328846 seconds.
+Training time 23.3161289692 seconds.
+Training time 13.4329741001 seconds.
+Training time 8.67994093895 seconds.
+Training time 31.7235541344 seconds.
+Training time 18.8416030407 seconds.
+Training time 17.2039029598 seconds.
+Training time 31.9648411274 seconds.
+Training time 27.7130429745 seconds.
+Training time 31.9419219494 seconds.
+Training time 12.4975759983 seconds.
+Training time 26.5242509842 seconds.
+Training time 14.4693078995 seconds.
+Training time 11.1523759365 seconds.
+Training time 19.7569229603 seconds.
+Training time 21.8860201836 seconds.
+Training time 24.6142549515 seconds.
+Training time 23.5524859428 seconds.
+Training time 27.5017910004 seconds.
+avg time and interval 21.5644712901 8.84325624704 32.2093685627
+accuracy
+mean 0.540139360007
+conf interval [0.464974048796,0.583253300094]
+hit_ratio
+mean 0.448489864313
+conf interval [0.142792627105,0.568302476704]
+mean_squared_error
+mean 0.992238827213
+conf interval [0.81391922176,2.44097661321]
+mean_absolute_error
+mean 0.580643699912
+conf interval [0.47633364134,1.12683156821]
+
+
+
+# cuda
+Training time 29.6455271244 seconds.
+Loss_tr: [1.292366268303843, 1.2371795295365817, 1.2288870298844392, 1.2234050794066491, 1.2237938631256247, 1.2215692406910335, 1.2201280168772721, 1.219385320768982, 1.2201566052621142, 1.2197189736068283, 1.2184752193336734, 1.2186683229779183, 1.219156752595548, 1.2184421736952871, 1.2189873777291735, 1.2177618658195319, 1.2175772227362756, 1.217801030136002, 1.2174700878464504, 1.2175573659239134, 1.217979245616432, 1.2208014299123877, 1.2179577975020452, 1.2164011050344847, 1.2164815357270675, 1.2162887530143585, 1.21623606409981, 1.2166674287509953, 1.2154520206380615, 1.2161794530043599]
+Validation loss [0.47452730179547564, 0.47182310556863605, 0.47104532933756471, 0.47094936125139297, 0.47122476516420531, 0.47146408142636548, 0.4708693387495238, 0.47098007637216466, 0.47091131591640972, 0.47087348254920108, 0.47071792400790269, 0.47048025874284105, 0.4706374620654003, 0.47062421178762531, 0.47042525719170447, 0.47036081862282375, 0.47032406470015736, 0.47017498382892897, 0.4699840271970685, 0.47004356146605802, 0.4700807341193724, 0.47020803945816941, 0.4700726688326351, 0.46983510566402475, 0.47012016969483567, 0.4698918246742198, 0.47013344848588767, 0.47013710941120856, 0.47011488333814405, 0.47010059808078625]
+Training time 18.2492718697 seconds.
+Training time 13.6096179485 seconds.
+Training time 16.1935040951 seconds.
+Training time 22.9221138954 seconds.
+Training time 15.5344228745 seconds.
+Training time 12.2099699974 seconds.
+Training time 26.5541639328 seconds.
+Training time 12.9438269138 seconds.
+Training time 8.16648006439 seconds.
+Training time 16.7190670967 seconds.
+Training time 15.8112459183 seconds.
+Training time 13.9505529404 seconds.
+Training time 25.8509039879 seconds.
+Training time 14.6468389034 seconds.
+Training time 19.76806283 seconds.
+Training time 21.9046871662 seconds.
+Training time 21.8179271221 seconds.
+Training time 11.0717279911 seconds.
+Training time 27.6835038662 seconds.
+Training time 9.89073085785 seconds.
+Training time 20.6931447983 seconds.
+Training time 9.77200818062 seconds.
+Training time 17.8574259281 seconds.
+Training time 14.1756470203 seconds.
+Training time 15.7813949585 seconds.
+Training time 23.6099500656 seconds.
+Training time 22.6209259033 seconds.
+Training time 24.255231142 seconds.
+Training time 27.6394150257 seconds.
+Training time 20.0003049374 seconds.
+Training time 16.5808451176 seconds.
+Training time 15.5769488811 seconds.
+Training time 9.08572101593 seconds.
+Training time 10.1250360012 seconds.
+Training time 11.7831380367 seconds.
+Training time 10.0754778385 seconds.
+Training time 11.3367109299 seconds.
+Training time 13.5878489017 seconds.
+Training time 8.65214896202 seconds.
+Training time 17.7966139317 seconds.
+Training time 14.8698909283 seconds.
+Training time 20.8660290241 seconds.
+Training time 17.4708998203 seconds.
+Training time 10.5939850807 seconds.
+Training time 22.377532959 seconds.
+Training time 15.8917081356 seconds.
+Training time 18.6454870701 seconds.
+Training time 14.5036010742 seconds.
+Training time 17.9899351597 seconds.
+Training time 22.6471428871 seconds.
+Training time 9.61761808395 seconds.
+Training time 17.593159914 seconds.
+Training time 14.1673178673 seconds.
+Training time 15.8741831779 seconds.
+Training time 19.7434351444 seconds.
+Training time 18.3979771137 seconds.
+Training time 12.4425241947 seconds.
+Training time 12.489951849 seconds.
+Training time 9.88561487198 seconds.
+Training time 14.2337179184 seconds.
+Training time 19.9907610416 seconds.
+Training time 27.1857709885 seconds.
+Training time 10.8676199913 seconds.
+Training time 20.8939878941 seconds.
+Training time 8.42801403999 seconds.
+Training time 16.5502340794 seconds.
+Training time 18.2387878895 seconds.
+Training time 14.2991669178 seconds.
+Training time 22.2107651234 seconds.
+Training time 14.354391098 seconds.
+Training time 25.4753859043 seconds.
+Training time 20.6113240719 seconds.
+Training time 22.3413410187 seconds.
+Training time 10.2707271576 seconds.
+Training time 8.88632798195 seconds.
+Training time 20.103730917 seconds.
+Training time 19.9498639107 seconds.
+Training time 25.0356359482 seconds.
+Training time 14.611852169 seconds.
+Training time 19.9355080128 seconds.
+Training time 19.3738460541 seconds.
+Training time 24.7124481201 seconds.
+Training time 17.9452280998 seconds.
+Training time 15.0946600437 seconds.
+Training time 11.7892329693 seconds.
+Training time 15.598706007 seconds.
+Training time 13.6921238899 seconds.
+Training time 12.5721619129 seconds.
+Training time 20.353192091 seconds.
+Training time 12.3459990025 seconds.
+Training time 16.3769519329 seconds.
+Training time 22.6863307953 seconds.
+Training time 7.23552393913 seconds.
+Training time 23.0324268341 seconds.
+Training time 12.9597389698 seconds.
+Training time 19.5190219879 seconds.
+Training time 16.0360438824 seconds.
+Training time 14.2321019173 seconds.
+Training time 18.1297340393 seconds.
+avg time and interval 16.9037846589 8.53447812796 27.423934108
+accuracy
+mean 0.540626098328
+conf interval [0.459706158813,0.583117413871]
+hit_ratio
+mean 0.444768268759
+conf interval [0.218106302109,0.573653343142]
+mean_squared_error
+mean 1.00010807187
+conf interval [0.814186328543,1.92705679721]
+mean_absolute_error
+mean 0.588308496038
+conf interval [0.47676026369,0.990720386038]
