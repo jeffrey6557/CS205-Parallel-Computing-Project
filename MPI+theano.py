@@ -47,12 +47,23 @@ def gradient(X,Y,w1,w2,w3,b1,b2,b3,batchsize,penalty):
     return [gw1,gw2,gw3,gb1,gb2,gb3]
 
 def lossfunc(X,Y,w1,w2,w3,b1,b2,b3):
-    Y=np.reshape(Y,[X.shape[0],1])
-    L01_temp = np.dot(X, w1) + b1
+    [nrow, ncol] = X.shape 
+    x = T.dmatrix('x')
+    y = T.dmatrix('y')
+    w01 = theano.shared(value = w1, name='w01',borrow=True)
+    w12 = theano.shared(value = w2, name='w12',borrow=True)
+    w23 = theano.shared(value = w3, name='w23',borrow=True)
+    b01 = theano.shared(value = b1, name='b01',borrow=True)
+    b12 = theano.shared(value = b2, name='b12',borrow=True)
+    b23 = theano.shared(value = b3, name='b23',borrow=True)
+    L01_temp = T.dot(x, w01) + b01
     L01 = L01_temp*(L01_temp>0)
-    L12 = np.dot(L01, w2) + b2 
-    L23 = np.dot(L12, w3) + b3
-    loss = np.mean((Y-L23)**2)  
+    L12 = T.dot(L01, w12) + b12 
+    L23 = T.dot(L12, w23) + b23
+    loss = T.mean((y-L23)**2)
+    f = theano.function(inputs=[x,y], outputs=[loss],name='f')
+    Y = np.reshape(Y,[nrow,1])
+    loss = f(X,Y)
     return loss
 
 if rank == 0:
