@@ -71,24 +71,25 @@ We tested our two levels of parallelisations separately and then combined via si
 
 1. MPI accuracy
 2. Parallelizable ANN algorithms within a model replica
-    i. Keras 
-    ii. Hessian-Free
+    i. [Keras](https://keras.io)
+    ii. Hessian-Free (Truncated Newton Method) *(more to come)*
 3. Combined models:
     i. MPI + Keras
     ii. MPI + Hessian-Free
 
-# *Continue from here*
 
 #### Performance metrics of simulations using MPI
-First, we tested the correctness of MPI implementation with data generated from a simple linear model. We think this is a reasonable "naive" test case because an ANN without hidden layers reduces to a linear regressor when it has linear activation functions.
+First, we tested the correctness of MPI implementation with data generated from a simple linear model. This is a reasonable *naïve* test case because ANN with zero hidden layers reduces to a linear regression if the activation function is linear.
 
 ![loss](images/simulation_MPI_loss.png)
+
 *Figure 3: MPI simulation, loss function*
 
-![beta](images/simulation_MPI_betaCopy.png)
+![beta](images/simulation_MPI_beta.png)
+
 *Figure 4: MPI simulation, speed up/thoughput*
 
-<span style="color:red"> **Can we make these images smaller to match rest of figures???** </span>
+
 
 ## Performance Metrics of a Model Replica
 Secondly, we tested the performance of a single model replica using OpenMP versus CUDA implementation on predicting minute-level stock returns of Goldman Sachs in 2016. We trained a fully-connected neural network with 4 layers (# units = [42,24,12,1]) and stop training once validation is not improving for 5 epochs. For speedup experiments, epochs are set to 100. 
