@@ -86,7 +86,7 @@ Firstly, we tested the correctness of MPI implementation with data generated fro
 ![loss](images/simulation_MPI_loss.png)
 *Figure 3: MPI simulation, loss function*
 
-![beta](images/simulation_MPI_beta\ copy.png)
+![beta](images/simulation_MPI_betaCopy.png)
 *Figure 4: MPI simulation, speed up/thoughput*
 
 <span style="color:red"> **Can we make these images smaller to match rest of figures???** </span>
