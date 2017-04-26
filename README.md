@@ -34,9 +34,13 @@ We normalize all the input and output variables:
 
 For the prediction method, multi-layer Artificial Neural Networks (ANN) using back-propagation algorithm has shown promising results in stock index prices compared with traditional methods [1]. Note that the traditional gradient descent algorithm of back-propagation is sequential by nature. We will therefore apply a technique that combines MPI with **three differerent parallelizable algorithms** to parallelize the training process: asynchronized multiple sub-neural networks[3] with nested parallel batch Stochastic Gradient Descent[2]. 
 
+The initial goal of our project was to implement a two-level parallelization model by combining MPI and OpenMP. Unfortunately, developing executable code using OpenMP (via Cython) resulted in an onerous and difficult task, therefore, we opted for existing Python neural network packages that could run in parallel. Nonetheless, we describe our desired design and the design we used for our project below.
+
 ### Neural Network Architecture (hyperparameters)
 
 We implement a **fully connected** network with:
+
+# *are some parts below true?*
 
 1. L = 1 to 10 layers
 2. number of neurons = 4 to 64 per layer; fewer neurons in deeper layers (pyramidal architecture)
@@ -55,10 +59,19 @@ We execute data and model parallelism at two levels. Firstly, each machine (e.g.
 
 *Figure 1: Parallelised Neural Network Architecture [3]. Model replicas asynchronously fetch parameters 𝑤 and push ∆𝑤 to the parameter server.*
 
-Secondly, each model replica computes ∆𝑤 by averaging the mini-batch gradients from 64 or 32 (depend on number of cores in a node) parallel threads (see Figure 2). We implemented this level with OpenMP (Cython parallel module).
+Secondly, each model replica computes ∆𝑤 by averaging the mini-batch gradients from 64 or 32 (depend on number of cores in a node) parallel threads (see Figure 2). We attempted to implement this level with OpenMP (Cython parallel module). However, we were unsuccessful with this implementation, so we used other algorithms mentioned below. 
 
 # Parallelism in Gradient Computation
 ![architecture](images/architecture.png)
+
+## Model replica algorithms
+
+Due to the 
+
+# *Add figure of true architecture!!!*
+<!-- ![pragmatic architecture]() -->
+
+
 *Figure 2: Parallelisation in each model replica.*
 
 ## Methods and Results
@@ -70,14 +83,15 @@ We tested our two levels of parallelizations separately and then combined via si
 1. MPI accuracy
 2. Parallelizable ANN algorithms within a model replica
 
-    a. [Keras](https://keras.io)
-    b. Hessian-Free (Truncated Newton Method) *(more to come)*
+    - Keras
+    - Hessian-Free (Truncated Newton Method) *(more to come)*
 3. Combined models:
     
-    a. MPI + Keras
-    b. MPI + Hessian-Free
+    - MPI + Keras
+    - MPI + Hessian-Free
 
 #### Performance metrics of simulations using MPI
+
 First, we test the correctness of MPI implementation with data generated from a simple linear model. This is a reasonable *naïve* test case because ANN with zero hidden layers reduces to a linear regression if the activation function is linear.
 
 ![loss](images/simulation_MPI_loss.png)
@@ -91,7 +105,10 @@ First, we test the correctness of MPI implementation with data generated from a 
 The decrease in the loss between predicted and observed outcomes and the convergence to the true value demonstrate that our MPI algorithm operates correctly.
 
 #### Performance Metrics of a Model Replica
-Secondly, we tested the performance of a single model replica using OpenMP versus CUDA implementation on predicting minute-level stock returns of Goldman Sachs in 2016. We trained a fully-connected neural network with 4 layers (# units = [42,24,12,1]) and stop training once validation is not improving for 5 epochs. For speedup experiments, epochs are set to 100. 
+
+# *Stop*
+
+<!-- Secondly, we tested the performance of a single model replica using OpenMP versus CUDA implementation on predicting minute-level stock returns of Goldman Sachs in 2016. We trained a fully-connected neural network with 4 layers (# units = [42,24,12,1]) and stop training once validation is not improving for 5 epochs. For speedup experiments, epochs are set to 100. 
 
 ![loss](images/GPU_loss.png) 
 
@@ -101,11 +118,8 @@ Secondly, we tested the performance of a single model replica using OpenMP versu
 
 *Figure 6: Speedups/thoughput (Epochs = 100) OpenMP with 32 threads and CUDA with 1 GPU machine. *
 
-#*STOP*
-
 We observe that loss function converges rather quickly and has a smooth trajectory due to the relatively large size of our batches. In terms of speedups, there is a performance peak at the batch size of 128. 
-
-Thirdly, we tested the combined model. <span style="color:red"> **No. Change** </span>
+-->
 
 # Validation and Testing Methods
 
