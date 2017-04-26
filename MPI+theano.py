@@ -42,7 +42,7 @@ def gradient(X,Y,w1,w2,w3,b1,b2,b3,batchsize,penalty):
     db1 = T.grad(cost=cost, wrt=b01)
     db2 = T.grad(cost=cost, wrt=b12)
     db3 = T.grad(cost=cost, wrt=b23)    
-    train = theano.function(inputs=[x,y], outputs=[dw1,dw2,dw3,db1,db2,db3],name='train',device=cuda)
+    train = theano.function(inputs=[x,y], outputs=[dw1,dw2,dw3,db1,db2,db3],name='train')
     gw1,gw2,gw3,gb1,gb2,gb3=train(trainX,trainY)
     return [gw1,gw2,gw3,gb1,gb2,gb3]
 
