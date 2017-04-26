@@ -61,44 +61,47 @@ Secondly, each model replica computes ∆𝑤 by averaging the mini-batch gradie
 ![architecture](images/architecture.png)
 *Figure 2: Parallelisation in each model replica.*
 
-## Experiments and Preliminary Results
+## Methods and Results
 
-### Preliminary Simulations
+### Simulations for performance analysis
 
-We tested our two levels of parallelisations separately and then combined via simulation:
-
-##### Simulations:
+We tested our two levels of parallelizations separately and then combined via simulation.
 
 1. MPI accuracy
 2. Parallelizable ANN algorithms within a model replica
+
     i. [Keras](https://keras.io)
     ii. Hessian-Free (Truncated Newton Method) *(more to come)*
 3. Combined models:
+    
     i. MPI + Keras
     ii. MPI + Hessian-Free
 
-
 #### Performance metrics of simulations using MPI
-First, we tested the correctness of MPI implementation with data generated from a simple linear model. This is a reasonable *naïve* test case because ANN with zero hidden layers reduces to a linear regression if the activation function is linear.
+First, we test the correctness of MPI implementation with data generated from a simple linear model. This is a reasonable *naïve* test case because ANN with zero hidden layers reduces to a linear regression if the activation function is linear.
 
 ![loss](images/simulation_MPI_loss.png)
 
-*Figure 3: MPI simulation, loss function*
+*Figure 3: MPI simulation, loss function. The loss decreases almost exponentially as the number of epochs increases.*
 
 ![beta](images/simulation_MPI_beta.png)
 
-*Figure 4: MPI simulation, speed up/thoughput*
+*Figure 4: Convergence of parameters. All three parameters converged to their true values, respectively. *
 
+The decrease in the loss between predicted and observed outcomes and the convergence to the true value demonstrate that our MPI algorithm operates correctly.
 
-
-## Performance Metrics of a Model Replica
+#### Performance Metrics of a Model Replica
 Secondly, we tested the performance of a single model replica using OpenMP versus CUDA implementation on predicting minute-level stock returns of Goldman Sachs in 2016. We trained a fully-connected neural network with 4 layers (# units = [42,24,12,1]) and stop training once validation is not improving for 5 epochs. For speedup experiments, epochs are set to 100. 
 
 ![loss](images/GPU_loss.png) 
-*Convergence of loss function of different implementations (Max epochs = 100, batch size=128) *
+
+*Figure 5: Convergence of loss function of different implementations (Max epochs = 100, batch size=128) *
 
 ![speedups](images/speedups.png)
-*Speedups/thoughput (Epochs = 100) OpenMP with 32 threads and CUDA with 1 GPU machine. *
+
+*Figure 6: Speedups/thoughput (Epochs = 100) OpenMP with 32 threads and CUDA with 1 GPU machine. *
+
+#*STOP*
 
 We observe that loss function converges rather quickly and has a smooth trajectory due to the relatively large size of our batches. In terms of speedups, there is a performance peak at the batch size of 128. 
 
