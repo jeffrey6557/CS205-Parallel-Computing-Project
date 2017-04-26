@@ -6,7 +6,7 @@ import theano.tensor as T
 from theano import function, config, shared, sandbox
 import os
 
-os.environ["THEANO_FLAGS"] = "device=cpu, openmp=1,floatX=float32"
+os.environ["THEANO_FLAGS"] = "device=cpu,openmp=TRUE,floatX=float32"
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 size = comm.Get_size()
@@ -16,7 +16,7 @@ num_neutron_2 = 12
 output_col=1 
 
 DIETAG = 666
-n_iteration = 100
+n_iteration = 10
 EPSILON = 10**-5
 eta = 1  ## learning rate
 
@@ -101,8 +101,8 @@ tuple_len=tuple([len0]+[len1]*(size-1))
 tuple_loc=tuple([0] + range(len0, nrow, len1))
 
 
-# comm.Scatterv([data,(len0,len1,len1),(0,len0,len0+len1),MPI.DOUBLE],subdata,root=0)
-comm.Scatterv([data,(len0,len1),(0,len0),MPI.DOUBLE],subdata,root=0)
+comm.Scatterv([data,(len0,len1,len1),(0,len0,len0+len1),MPI.DOUBLE],subdata,root=0)
+#comm.Scatterv([data,(len0,len1),(0,len0),MPI.DOUBLE],subdata,root=0)
 comm.Barrier()
 
 if rank == 0 :

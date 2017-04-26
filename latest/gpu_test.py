@@ -3,9 +3,8 @@ import pandas as pd
 import theano
 import theano.tensor as T
 import time
-import os
 
-os.environ["THEANO_FLAGS"] = "device=cpu,openmp=1,floatX=float32"
+
 input_col = 42
 num_neutron_1 = 24
 num_neutron_2 = 12
@@ -58,7 +57,7 @@ db3 = np.ones(output_col)
 
 time1=time.time()
 cache=0
-k=10
+k=1000
 loss_vec=np.empty(k)
 for i in range(k):
     loss,dw1,dw2,dw3,db1,db2,db3 = gradient(data[:,0:42],data[:,43],w1,w2,w3,b1,b2,b3,50,1)
