@@ -20,26 +20,25 @@ output_col=1
 
 # architecture
 n_nodes = [42,24,12,1]
-param_list = []
+# initialize random parameters in the order w1,w2,...b1,b2...
 # for each layer, connect to next layer, in the order w1,w2,...b1,b2...
 for i in range(len(n_nodes)-1):
-    w = np.random.randn(n_nodes[i],n_nodes[i+1]) # 2-d array 
+     w = np.random.normal(loc = 0, scale = 1./ np.sqrt(n_nodes[i]), size = (n_nodes[i],n_nodes[i+1]) ) # 2-d array 
     param_list += [w]
 for i in range(len(n_nodes)-1):   
     b = np.zeros(n_nodes[i+1])  # 1-darray 
     param_list += [b]
 
 # cache has the same dimensions as parameters and gradients
-cache_list = [np.zeros_like(w) for w in param_list]
 
-
-
+m_list,v_list = [np.zeros(w.shape) for w in param_list],[np.zeros(w.shape) for w in param_list]
+beta1,beta2 = 0.9,0.999
 
 DIETAG = 666
 n_iteration = 10
 EPSILON = 10**-5
 eta = 1  ## learning rate
-l2_rate = # regularization l2 rate
+l2_rate = 0.01# regularization l2 rate
 
 def gradient(trainX,trainY,w1,w2,w3,b1,b2,b3):
     [nrow, ncol] = trainX.shape 
