@@ -1,8 +1,6 @@
 
 # CS 205 FINAL PROJECT REPORT 
 
-Click [here](https://jeffrey6557.github.io/CS205-Parallel-Computing-Project/) for website.
-
 ## Parallelizing Neural Network with Improved Performance 
 Chang Liu, Greyson Liu, Kamrine Poels, Linglin Huang
 
@@ -60,7 +58,7 @@ Secondly, each model replica computes ∆𝑤 by averaging the mini-batch gradie
 ![architecture](images/architecture.png)
 *Figure 2: Desired parallelization in each model replica.*
 
-## Model replica algorithms
+## Model replica algorithms (optimization methods)
 
 Due to the lack of success in our OpenMP algorithm, we used the algorithms listed below. 
 
@@ -73,7 +71,7 @@ SGD is implemented using the Python package [Theano](http://deeplearning.net/sof
 
 ![true architecture](images/true_architecture.png)
 
-*Figure 3: Real architecture of our algorithm. Notice that Adam and AdaGrad will be merged.*
+*Figure 3: Real architecture of our algorithm. Note that Adam, AdaGrad, Hessian-Free are optimization methods that can be run in parallel through OpenMP. Each of these optimization methods can also be run sequentially, which will be our baseline when comparing the competence of our parallelization.*
 
 ## Methods and Results
 
@@ -89,7 +87,8 @@ We tested our two levels of parallelizations separately and then combined via si
     - Hessian-Free
 3. Combined models:
     - MPI + SGD
-    - MPI + Adam + AdaGrad
+    - MPI + Adam
+    - MPI + AdaGrad
     - MPI + Hessian-Free
 
 #### Performance metrics of simulations using MPI
