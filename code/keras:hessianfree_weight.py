@@ -91,6 +91,47 @@ def keras_NN(n_nodes,optimizer):
     return model
 
 
+###############################################################################################################
+
+# Example OF comparing keras and Hessian Free: 
+
+# read data and define training, validation and test set
+data = np.genfromtxt('price_inputs_GS2016.csv',delimiter=',',skip_header=1)
+X,ret = data[:,2:],data[:,1:2] # X means features, ret means target 
+print 'shape of total X and ret:',X.shape,ret.shape
+
+n_test = int(X.shape[0]*0.25)
+N = X.shape[0] - n_test
+n_val = int(N*0.2)
+X_tr_temp, X_test, ret_tr_temp,ret_test = X[:-n_test],X[-n_test:],ret[:-n_test],ret[-n_test:]
+X_tr,X_val,ret_tr,ret_val = X_tr_temp[:-n_val], X_tr_temp[-n_val:],ret_tr_temp[:-n_val],ret_tr_temp[-n_val:]
+
+
+
+################### KERAS ONLY ######################
+
+ 
+# define hyperparameters
+n_nodes = [42,24,12,1] # number of units per layer
+batch_size = 1024
+
+
+
+
+
+early_stopping = EarlyStopping(patience=5)
+# CHOOSE adam or adagrad 
+model = keras_NN(n_nodes=n_nodes,optimizer='sgd')
+model.fit(X_tr,ret_tr,verbose=0,epochs=100,batch_size=batch_size,
+                 validation_data=(X_val,ret_val),callbacks=[early_stopping])
+print 'After fitting on the training set for 100 epochs, keras return this weight parameter' 
+print model.get_weights()
+     
+
+
+################### Hessian Free ######################
+
+
 
 def output_loss(func):
     """Convenience decorator that takes a loss defined for the output layer
@@ -134,102 +175,21 @@ def pack_weights(ff):
 
 pshape = lambda a_list: [ w.shape for w in a_list]
 
-###############################################################################################################
 
-# Example OF comparing keras and Hessian Free: run 
-
-# read data and define training, validation and test set
-data = np.genfromtxt('price_inputs_GS2016.csv',delimiter=',',skip_header=1)
-X,ret = data[:,2:],data[:,1:2] # X means features, ret means target 
-print 'shape of total X and ret:',X.shape,ret.shape
-
-n_test = int(X.shape[0]*0.25)
-N = X.shape[0] - n_test
-n_val = int(N*0.2)
-X_tr_temp, X_test, ret_tr_temp,ret_test = X[:-n_test],X[-n_test:],ret[:-n_test],ret[-n_test:]
-X_tr,X_val,ret_tr,ret_val = X_tr_temp[:-n_val], X_tr_temp[-n_val:],ret_tr_temp[:-n_val],ret_tr_temp[-n_val:]
-
-
-
-# run some number of trials for each model
-n_trials = 2
+# define hyperparameters
+layers = (len(n_nodes)-1)*['ReLU'] + ['Linear'] # all relu except linear for output layer
 n_nodes = [42,24,12,1] # number of units per layer
 batch_size = 1024
-layers = (len(n_nodes)-1)*['ReLU'] + ['Linear'] # all relu except linear for output layer
-
-# define evaluation metrics
-accuracy = lambda pred,truth: np.mean((pred>0)==(truth>0))
-hit_ratio = lambda x,y: np.mean( ((x[1:] - x[:-1]) * (y[1:]-y[:-1]))>0 )
-eval_f = [accuracy,hit_ratio,mean_squared_error,mean_absolute_error]
-labels = 'accuracy,hit_ratio,mean_squared_error,mean_absolute_error'.split(',')
-
-timer = np.zeros((n_trials,2))
-scores = np.zeros( (n_trials,len(labels), 2) )
-
-for i in range(n_trials):
-                      
-    # CHOOSE adam or adagrad 
-    early_stopping = EarlyStopping(patience=10)
-    start = time.time()
-    model = keras_NN(n_nodes=n_nodes,optimizer='adagrad')
-    hist = model.fit(X_tr,ret_tr,verbose=0,epochs=100,batch_size=batch_size,
-                     validation_data=(X_val,ret_val),callbacks=[early_stopping])
-    timer[i,0] = time.time()-start
-    
-    # evaluation metrics
-    pred = model.predict(X_test).flatten()
-    truth = ret_test.flatten()
-    scores[i,:,0] = [ f(pred,truth) for j,f in enumerate(eval_f) ]
-               
-        
-    # initliaze a hessian free model
-    ff = hf.FFNet(n_nodes,layers=layers,loss_type=hf.loss_funcs.SquaredError(),
-              W_init_params={ "coeff":1.0, "biases":1.0,"init_type":'gaussian'},use_GPU=0)
-    
-    # Hession free
-    start = time.time()
-    ff.run_epochs(X,ret,test=(X_val,ret_val),minibatch_size=1024,
-                          optimizer=hf.opt.HessianFree(CG_iter=2),
-                          max_epochs=50, plotting=True,print_period=None)
-    timer[i,1] = time.time()-start
-    
-    # here I am borrowing Keras' model to evaluate the loss function of weights from Hessian free
-    model.set_weights(pack_weights(ff))
-    
-     # evaluation metrics
-    pred = model.predict(X_test).flatten()
-    truth = ret_test.flatten()
-    scores[i,:,1] = [ f(pred,truth) for j,f in enumerate(eval_f) ]
-    
 
 
-# print 'keras training loss',hist.history['loss']
-# print 'valdidation loss',hist.history['val_loss']
-# print 'hessian free training loss',ff.optimizer.plots['training error (log)']
-# print 'validation loss',ff.test_errs
+# initialize a hessian free model with GPU use optional
+ff = hf.FFNet(n_nodes,layers=layers,loss_type=mse(),
+          W_init_params={ "coeff":1.0, "biases":1.0,"init_type":'gaussian'},use_GPU=0)
 
+ff.run_epochs(X,ret,test=(X_val,ret_val),minibatch_size=1024,
+                      optimizer=hf.opt.HessianFree(CG_iter=2),
+                      max_epochs=50, plotting=True,print_period=None)
 
-# for jj in range(2):
-#     print 
-#     print 'keras adagrad,hessian free'.split(',')[jj]
-#     s = scores[:,:,jj]
-#     print 'running time per trial',timer[:,jj]
-#     mu = s.mean(axis=0)
-#     lower_bound = np.percentile(s, 2.5, axis=0)
-#     upper_bound = np.percentile(s, 97.5, axis=0)
-     
-#     for i in range(s.shape[1]):
-#         print labels[i]
-#         print 'mean {}'.format(mu[i])
-#         print 'conf interval [{},{}]'.format(lower_bound[i],upper_bound[i])
-
-
-# In[ ]:
-
-
-
-
-# In[ ]:
-
-
+print 'After fitting on the training set for 100 epochs, hessian free return this weight parameter' 
+print pack_weights(ff)
 
