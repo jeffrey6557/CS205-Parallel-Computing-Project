@@ -140,7 +140,7 @@ if rank == 0:
         print "loss", l_new
         epsilon = abs(l_new - l_old)
         l_old = l_new
-        if iteration > n_iteration or epsilon < EPSILON:
+        if iteration == n_iteration or epsilon < EPSILON:
                 break
         status = MPI.Status()
         dw1,dw2,dw3,db1,db2,db3 = comm.recv(source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG,status=status)
@@ -157,7 +157,7 @@ if rank == 0:
 
     #send message to let workers stop
     for r in range(1, size):
-        comm.send(0, dest=r, tag=DIETAG)
+        comm.send([0]*6, dest=r, tag=DIETAG)
 
 else:
     while True:

@@ -15,7 +15,7 @@ module load Anaconda/2.1.0-fasrc01
 module load gcc
 module load openmpi
 #conda create -n ody --clone="$PYTHON_HOME"
-#source activate ody
+source activate ody
 #conda install -c anaconda pygpu=0.6.4
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 srun -n $SLURM_NTASKS -c $SLURM_CPUS_PER_TASK --mpi=pmi2 python MPI+theano.py
