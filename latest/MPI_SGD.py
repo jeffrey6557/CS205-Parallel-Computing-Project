@@ -16,9 +16,10 @@ num_neutron_2 = 12
 output_col=1 
 
 DIETAG = 666
-n_iteration = 10
+n_iteration = 50
 EPSILON = 10**-5
-eta = 1  ## learning rate
+eta = 0.01  ## learning rate
+penalty_parameter=0.01
 
 def gradient(X,Y,w1,w2,w3,b1,b2,b3,batchsize,penalty):
     [nrow, ncol] = X.shape 
@@ -67,15 +68,17 @@ def lossfunc(X,Y,w1,w2,w3,b1,b2,b3):
     f = theano.function(inputs=[x,y], outputs=[loss],name='f')
     Y = np.reshape(Y,[nrow,1])
     loss = np.asscalar(f(X,Y)[0])
-    return loss
+    return [loss, L23]
 
 if rank == 0:
-    data = pd.read_csv("test_data.csv",header=-1)
+    #data = pd.read_csv("test_data.csv",header=-1)
+    data = np.genfromtxt('price_inputs_GS2016.csv',delimiter=',',skip_header=1)[:,1:]
+    #X,ret = data[:,2:],data[:,1:2] # X means features, ret means target 
     [nrow, ncol] = data.shape
-    data=data.values.flatten()
-    chunksize = int(np.ceil(nrow/size))
-    len0=(nrow-(size-1)*chunksize)*ncol
+    data=data.flatten()
+    chunksize = int(np.ceil(0.75*nrow/(size-1)))
     len1=chunksize*ncol
+    len0=nrow*ncol-len1*(size-1)
 else:
     data = None
     nrow = None
@@ -97,12 +100,10 @@ if rank == 0 :
 else:
     subdata = np.empty(len1)
 
-tuple_len=tuple([len0]+[len1]*(size-1))
-tuple_loc=tuple([0] + range(len0, nrow, len1))
-
-
-comm.Scatterv([data,(len0,len1,len1),(0,len0,len0+len1),MPI.DOUBLE],subdata,root=0)
-#comm.Scatterv([data,(len0,len1),(0,len0),MPI.DOUBLE],subdata,root=0)
+if size==4:
+    comm.Scatterv([data,(len0,len1,len1,len1),(0,len0,len0+len1,len0+2*len1),MPI.DOUBLE],subdata,root=0)
+if size==8:
+    comm.Scatterv([data,(len0,len1,len1,len1,len1,len1,len1,len1),(0,len0,len0+len1,len0+2*len1,len0+3*len1,len0+4*len1,len0+5*len1,len0+6*len1),MPI.DOUBLE],subdata,root=0)
 comm.Barrier()
 
 if rank == 0 :
@@ -133,11 +134,12 @@ db2 = np.empty(num_neutron_2)
 db3 = np.empty(output_col)
 
 if rank == 0:
+    fout = open("out_{}_MPI_SGD".format(size), "w")
     iteration = 0
     l_old = -1 #loss
     while True:               
-        l_new = lossfunc(data[:,0:42],data[:,43],w1,w2,w3,b1,b2,b3)##############
-        print "loss", l_new
+        l_new, pred_y = lossfunc(subdata[:,1:],subdata[:,0],w1,w2,w3,b1,b2,b3)##############
+        #print "loss", l_new
         epsilon = abs(l_new - l_old)
         l_old = l_new
         if iteration == n_iteration or epsilon < EPSILON:
@@ -152,18 +154,24 @@ if rank == 0:
         b2 = b2 + db2*eta_master
         b3 = b3 + db3*eta_master
         comm.send([w1,w2,w3,b1,b2,b3],dest=status.Get_source(),tag=0)
-        print "dw from worker {}".format(status.Get_source())
+        #print "dw from worker {}".format(status.Get_source())
+        print "{},{},{}".format(l_new,eta_master,status.Get_source())
         iteration += 1
 
     #send message to let workers stop
     for r in range(1, size):
         comm.send([0]*6, dest=r, tag=DIETAG)
 
+    #print data
+    for y_i in range(pred_y.shape[0]):
+        fout.write(str(pred_y[y_i,0])+'\n')
+
+
 else:
     while True:
         cache=0
-        for j in range(100): ## 100 batch iterations
-            dw1,dw2,dw3,db1,db2,db3 = gradient(subdata[:,0:42],subdata[:,43],w1_temp,w2_temp,w3_temp,b1_temp,b2_temp,b3_temp,50,1) ## batchsize=50, penalty parameter=1
+        for j in range(20): ## 100 batch iterations
+            dw1,dw2,dw3,db1,db2,db3 = gradient(subdata[:,1:],subdata[:,0],w1_temp,w2_temp,w3_temp,b1_temp,b2_temp,b3_temp,500,penalty_parameter) ## batchsize=50, penalty parameter=1
             cache += sum(map(sum, dw1**2))+sum(map(sum, dw2**2))+sum(map(sum, dw3**2))+sum(db1**2)+sum(db2**2)+sum(db3**2)
             eta_worker=eta/np.sqrt(cache)
             w1_temp = w1_temp - dw1*eta_worker
