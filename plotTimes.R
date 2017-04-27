@@ -16,8 +16,15 @@ seq = c(18.5330983472,11.0279892445, 30.1942003429)
 openMP = c(14.9100168781, 9.60147128105, 26.312218219)
 pycuda = c(7.50733185935, 4.52090799212, 13.1926374018)
 
-png("adam_time.png")
+png("images/adam_time.png")
 plotTimes(seq, openMP, pycuda)
 dev.off()
 
 # Exercise 4 (Hessian-Free)
+seq = c(18.5330983472,11.0279892445, 30.1942003429)
+openMP = c(14.9100168781, 9.60147128105, 26.312218219)
+pycuda = c(7.50733185935, 4.52090799212, 13.1926374018)
+
+png("images/adam_time.png")
+plotTimes(seq, openMP, pycuda)
+dev.off()
