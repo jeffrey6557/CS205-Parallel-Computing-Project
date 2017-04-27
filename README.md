@@ -108,11 +108,15 @@ The decrease in the loss between predicted and observed outcomes and the converg
 
 #### Performance Metrics of a Model Replica
 
+We test the performance of a single model replica using each of the model replica algorithms versus CUDA implementation on predicting minute-level stock returns of Goldman Sachs in 2016. 
+
 ##### SGD
+
+????
 
 ##### Adam
 
-![]()
+![times for Adam](images/adam_time.png)
 
 ##### AdaGrad
 
