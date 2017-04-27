@@ -168,11 +168,11 @@ if rank == 0:
         status = MPI.Status()
         print "dw from worker {}".format(status.Get_source())
 
-        master_grad_list = comm.recv(source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG,status=status)
+        grad_list = comm.recv(source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG,status=status)
         
         start = time.time()
         # each grad and cache have the same dimensions as param 
-        for jj, grad,cache in enumerate(master_grad_list,cache_list):
+        for jj, (grad,m,v) in enumerate(grad_list,m_list,v_list):
             
             # calculate decay as a scalar 
             if jj < len(master_grad_list)/2 :  # when it is w 
@@ -187,7 +187,7 @@ if rank == 0:
            
         print 'master ',rank,'updates parameters takes',time.time()-start
         
-        comm.send(master_param_list,dest=status.Get_source(),tag=0)
+        comm.send(param_list,dest=status.Get_source(),tag=0)
         
         iteration += 1
 

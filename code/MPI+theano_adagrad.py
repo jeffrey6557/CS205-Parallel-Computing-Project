@@ -170,14 +170,14 @@ if rank == 0:
         status = MPI.Status()
         print "dw from worker {}".format(status.Get_source())
 
-        master_grad_list = comm.recv(source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG,status=status)
+        grad_list = comm.recv(source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG,status=status)
         
         start = time.time()
         # each grad and cache have the same dimensions as param 
-        for jj, grad,m,v in enumerate(master_grad_list,,m_list,v_list):
+        for jj, grad,cache in enumerate(grad_list,cache_list):
             
             # calculate decay as a scalar 
-            if jj < len(master_grad_list)/2 :  # when it is w 
+            if jj < len(grad_list)/2 :  # when it is w 
                 decay =  1 - l2_rate * learning_rate/ int(len1/ncol)
             else: # when it is b
                 decay = 1.
