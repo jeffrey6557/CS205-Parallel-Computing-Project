@@ -18,8 +18,9 @@ output_col=1
 DIETAG = 666
 n_iteration = 50
 EPSILON = 10**-5
-eta = 0.01  ## learning rate
+eta = 0.1  ## learning rate
 penalty_parameter=0.01
+
 
 def gradient(X,Y,w1,w2,w3,b1,b2,b3,batchsize,penalty):
     [nrow, ncol] = X.shape 
@@ -146,16 +147,15 @@ if rank == 0:
                 break
         status = MPI.Status()
         dw1,dw2,dw3,db1,db2,db3 = comm.recv(source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG,status=status)
-        eta_master=eta/np.sqrt(sum(map(sum, dw1**2))+sum(map(sum, dw2**2))+sum(map(sum, dw3**2))+sum(db1**2)+sum(db2**2)+sum(db3**2))
-        w1 = w1 + dw1*eta_master
-        w2 = w2 + dw2*eta_master
-        w3 = w3 + dw3*eta_master
-        b1 = b1 + db1*eta_master
-        b2 = b2 + db2*eta_master
-        b3 = b3 + db3*eta_master
+        w1 = w1 - dw1
+        w2 = w2 - dw2
+        w3 = w3 - dw3
+        b1 = b1 - db1
+        b2 = b2 - db2
+        b3 = b3 - db3
         comm.send([w1,w2,w3,b1,b2,b3],dest=status.Get_source(),tag=0)
         #print "dw from worker {}".format(status.Get_source())
-        print "{},{},{}".format(l_new,eta_master,status.Get_source())
+        print "{},{}".format(l_new,status.Get_source())
         iteration += 1
 
     #send message to let workers stop
@@ -163,29 +163,44 @@ if rank == 0:
         comm.send([0]*6, dest=r, tag=DIETAG)
 
     #print data
-    for y_i in range(pred_y.shape[0]):
-        fout.write(str(pred_y[y_i,0])+'\n')
+    #for y_i in range(pred_y.shape[0]):
+    #    fout.write(str(pred_y[y_i,0])+'\n')
 
 
 else:
+    cache_dw1 = np.zeros([input_col,num_neutron_1])
+    cache_dw2 = np.zeros([num_neutron_1,num_neutron_2])
+    cache_dw3 = np.zeros([num_neutron_2,output_col])
+    cache_db1 = np.zeros(num_neutron_1)
+    cache_db2 = np.zeros(num_neutron_2)
+    cache_db3 = np.zeros(output_col)
     while True:
-        cache=0
-        for j in range(20): ## 100 batch iterations
+        for j in range(20): 
             dw1,dw2,dw3,db1,db2,db3 = gradient(subdata[:,1:],subdata[:,0],w1_temp,w2_temp,w3_temp,b1_temp,b2_temp,b3_temp,500,penalty_parameter) ## batchsize=50, penalty parameter=1
-            cache += sum(map(sum, dw1**2))+sum(map(sum, dw2**2))+sum(map(sum, dw3**2))+sum(db1**2)+sum(db2**2)+sum(db3**2)
-            eta_worker=eta/np.sqrt(cache)
-            w1_temp = w1_temp - dw1*eta_worker
-            w2_temp = w2_temp - dw2*eta_worker
-            w3_temp = w3_temp - dw3*eta_worker
-            b1_temp = b1_temp - db1*eta_worker
-            b2_temp = b2_temp - db2*eta_worker
-            b3_temp = b3_temp - db3*eta_worker
-        dw1 = w1_temp - w1
-        dw2 = w2_temp - w2
-        dw3 = w3_temp - w3
-        db1 = b1_temp - b1
-        db2 = b2_temp - b2
-        db3 = b3_temp - b3
+            cache_dw1 += dw1**2
+            cache_dw2 += dw2**2
+            cache_dw3 += dw3**2
+            cache_db1 += db1**2
+            cache_db2 += db2**2
+            cache_db3 += db3**2
+            eta_w1=eta/np.sqrt(cache_dw1)
+            eta_w2=eta/np.sqrt(cache_dw2)
+            eta_w3=eta/np.sqrt(cache_dw3)
+            eta_b1=eta/np.sqrt(cache_db1)
+            eta_b2=eta/np.sqrt(cache_db2)
+            eta_b3=eta/np.sqrt(cache_db3)
+            w1_temp = w1_temp - np.multiply(dw1, eta_w1)
+            w2_temp = w2_temp - np.multiply(dw2, eta_w2)
+            w3_temp = w3_temp - np.multiply(dw3, eta_w3)
+            b1_temp = b1_temp - np.multiply(db1, eta_b1)
+            b2_temp = b2_temp - np.multiply(db2, eta_b2)
+            b3_temp = b3_temp - np.multiply(db3, eta_b3)
+        dw1 = -w1_temp + w1
+        dw2 = -w2_temp + w2
+        dw3 = -w3_temp + w3
+        db1 = -b1_temp + b1
+        db2 = -b2_temp + b2
+        db3 = -b3_temp + b3
         comm.send([dw1,dw2,dw3,db1,db2,db3], dest=0, tag=1)
         status = MPI.Status()
         w1,w2,w3,b1,b2,b3 = comm.recv(source=0,tag=MPI.ANY_TAG,status=status)
