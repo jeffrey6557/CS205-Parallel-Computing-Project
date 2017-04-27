@@ -1,7 +1,7 @@
 plotTimes = function(data, labels){
   plot(data[1,], pch = 16, col = 1:ncol(data), ylim = c(0, max(data)), 
        xaxt = "n", xlab = "", ylab = "Time in seconds", xlim = c(0.5,ncol(data)+.5), 
-       main = "Running time with 95% CI" )
+       main = "Average Running Time with 95% CI" )
   axis(side = 1, at = 1:ncol(data), labels = labels, tick = F, las = 2)
   for (i in 1:ncol(data)){
     if (i < ncol(data)){abline(v = i+.5, lty = 2)}

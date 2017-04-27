@@ -105,24 +105,13 @@ First, we test the correctness of MPI implementation with data generated from a 
 
 The decrease in the loss between predicted and observed outcomes and the convergence to the true value demonstrate that our MPI algorithm operates correctly.
 
-#### Performance Metrics of a Model Replica
+#### Performance of a Model Replica
 
-We test the performance of a single model replica using each of the model replica algorithms versus CUDA implementation on predicting minute-level stock returns of Goldman Sachs in 2016. With an input size of 100,000 observations, we train a model with 75% of the stock prices and test it on the rest of the data. The following are characteristics of our model:
+We test the performance of a single model replica using each of the model replica algorithms versus CUDA implementation on predicting minute-level stock returns of Goldman Sachs in 2016. With an input size of 100,000 observations, we train a model with 75% of the stock prices and test it on the rest of the data. The batch size is 1,024 per model replica, a neural network has 3 hidden layers with 24, 12, 6 neurons, respectively. The maximum number of epochs (loosely defined as an iteration over iterations) was set to 100, and the initial learning rate is 0.001. The activation function is Relu except on the last layer, the output, where the activation function is linear. Below we show the average running time of the algorithms, including CUDA, which still outperforms the other optimization methods. We ran a total of 100 models for each algorithm.
 
-- N = 100,000
-- Batch size
+![all times](images/experiment4_times.png)
 
-
-full sample test of 2016, N ~ 100,000, n_test = last 25% of N, n_training = first (75% * 80% * N )
-
-batch size = 1024, hidden units = 24 , 12, 6, patience = 5, max epochs = 100, 
-lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0), L2_regularizer = 0.0001, max norm = 3 for hidden untes ; 5 for inut layers
-initizalizer = he_normal, activation = relu except output activation = linear 
-# backtest setting 
-
-run 100 models, each predict (target returns) on the same validation and test set, report average accuracy, conf interval = 2.5% and 97% percentile of metrics
-
-![times for Adam](images/adam_time.png)
+# *FINISH FROM HERE*
 
 <!-- Secondly, we tested the performance of a single model replica using OpenMP versus CUDA implementation on predicting minute-level stock returns of Goldman Sachs in 2016. We trained a fully-connected neural network with 4 layers (# units = [42,24,12,1]) and stop training once validation is not improving for 5 epochs. For speedup experiments, epochs are set to 100. 
 
