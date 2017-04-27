@@ -1,7 +1,7 @@
 
 # CS 205 FINAL PROJECT REPORT 
 
-<!-- URL: https://jeffrey6557.github.io/CS205-Parallel-Computing-Project/ -->
+Click [here](URL: https://jeffrey6557.github.io/CS205-Parallel-Computing-Project/) for website.
 
 ## Parallelizing Neural Network with Improved Performance 
 Chang Liu, Greyson Liu, Kamrine Poels, Linglin Huang
@@ -121,6 +121,8 @@ We test the performance of a single model replica using each of the model replic
 ##### AdaGrad
 
 ##### Hessian-Free
+
+![all times](images/experiment4_times.png)
 
 <!-- Secondly, we tested the performance of a single model replica using OpenMP versus CUDA implementation on predicting minute-level stock returns of Goldman Sachs in 2016. We trained a fully-connected neural network with 4 layers (# units = [42,24,12,1]) and stop training once validation is not improving for 5 epochs. For speedup experiments, epochs are set to 100. 
 

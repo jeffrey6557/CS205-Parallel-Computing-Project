@@ -70,6 +70,6 @@ openMP64 = c(40.8446625209, 19.3463171542, 72.0430283785)
 cuda = c(21.002744205, 11.5748599172, 38.3353739738)
 ex2 = cbind(adagrad, hessian, seq, openMP16, openMP64, cuda)
 
-png("experiment_4.png")
+png("images/experiment4_times.png")
 plotTimes(ex2, c("AdaGrad", "Hessian\nfree", "Sequential", "OpenMP\n16 cores", "OpenMP\n64 cores", "PyCuda"))
 dev.off()
