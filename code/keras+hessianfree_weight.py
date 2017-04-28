@@ -195,3 +195,85 @@ ff.run_epochs(X,ret,test=(X_val,ret_val),minibatch_size=1024,
 print 'After fitting on the training set for 100 epochs, hessian free return this weight parameter' 
 print pack_weights(ff)
 
+
+
+
+############################## Evaluation metrics ##############################
+
+# run some number of trials for each model
+n_trials = 1
+n_nodes = [42,24,12,1] # number of units per layer
+batch_size = 1024
+layers = (len(n_nodes)-1)*['ReLU'] + ['Linear'] # all relu except linear for output layer
+
+# define evaluation metrics
+accuracy = lambda pred,truth: np.mean((pred>0)==(truth>0))
+hit_ratio = lambda x,y: np.mean( ((x[1:] - x[:-1]) * (y[1:]-y[:-1]))>0 )
+eval_f = [accuracy,hit_ratio,mean_squared_error,mean_absolute_error]
+labels = 'accuracy,hit_ratio,mean_squared_error,mean_absolute_error'.split(',')
+
+timer = np.zeros((n_trials,2))
+scores = np.zeros( (n_trials,len(labels), 2) )
+
+for i in range(n_trials):
+                      
+    # CHOOSE sgd, adam or adagrad 
+    early_stopping = EarlyStopping(patience=5)
+    start = time.time()
+    model = keras_NN(n_nodes=n_nodes,optimizer='sgd')
+    hist = model.fit(X_tr,ret_tr,verbose=0,epochs=100,batch_size=batch_size,
+                     validation_data=(X_val,ret_val),callbacks=[early_stopping])
+    timer[i,0] = time.time()-start
+    
+    # evaluation metrics
+    pred = model.predict(X_test).flatten()
+    truth = ret_test.flatten()
+    scores[i,:,0] = [ f(pred,truth) for j,f in enumerate(eval_f) ]
+               
+    
+    # initliaze a hessian free model
+    ff = hf.FFNet(n_nodes,layers=layers,loss_type=hf.loss_funcs.SquaredError(),
+              W_init_params={ "coeff":1.0, "biases":1.0,"init_type":'gaussian'},use_GPU=0)
+    
+    # Hession free
+    start = time.time()
+    ff.run_epochs(X,ret,test=(X_val,ret_val),minibatch_size=1024,
+                          optimizer=hf.opt.HessianFree(CG_iter=2),
+                          max_epochs=50, plotting=True,print_period=None)
+    timer[i,1] = time.time()-start
+    
+    # here I am borrowing Keras' model to evaluate the loss function of weights from Hessian free
+    model.set_weights(pack_weights(ff))
+    
+     # evaluation metrics
+    pred = model.predict(X_test).flatten()
+    truth = ret_test.flatten()
+    scores[i,:,1] = [ f(pred,truth) for j,f in enumerate(eval_f) ]
+    
+
+
+# print 'keras training loss',hist.history['loss']
+# print 'valdidation loss',hist.history['val_loss']
+# print 'Hessian Free training loss',ff.optimizer.plots['training error (log)'] # it says log but it's not for MSE
+# print 'Hessian Free validation loss',ff.test_errs
+
+for jj in range(2):
+    print 
+    exp = 'keras adagrad,hessian free'.split(',')[jj]
+    print 'Evaluating ',exp
+    print 'running time per trial',timer[:,jj]
+    s = scores[:,:,jj]
+    print 'scores'
+    print s
+    mu = s.mean(axis=0)
+    lower_bound = np.percentile(s, 2.5, axis=0)
+    upper_bound = np.percentile(s, 97.5, axis=0)
+     
+    for i in range(s.shape[1]):
+        print labels[i]
+        print 'mean {}'.format(mu[i])
+        print 'conf interval [{},{}]'.format(lower_bound[i],upper_bound[i])
+
+
+
+
