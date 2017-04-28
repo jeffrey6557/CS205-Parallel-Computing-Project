@@ -263,16 +263,18 @@ for jj in range(2):
     print 'Evaluating ',exp
     print 'running time per trial',timer[:,jj]
     s = scores[:,:,jj]
-    print 'scores'
-    print s
+    print 'prediction scores'
+    
     mu = s.mean(axis=0)
+    sd = s.std(axis=0)
+
     lower_bound = np.percentile(s, 2.5, axis=0)
     upper_bound = np.percentile(s, 97.5, axis=0)
      
     for i in range(s.shape[1]):
         print labels[i]
-        print 'mean {}'.format(mu[i])
-        print 'conf interval [{},{}]'.format(lower_bound[i],upper_bound[i])
+        print 'mean {} and std {}'.format(mu[i],std[i])
+        print '2.5 and 97.5 percentile [{},{}]'.format(lower_bound[i],upper_bound[i])
 
 
 
