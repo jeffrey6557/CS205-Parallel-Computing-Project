@@ -5,6 +5,7 @@ import theano
 import theano.tensor as T
 from theano import function, config, shared, sandbox
 import os
+import keras_gradient as kg
 
 os.environ["THEANO_FLAGS"] = "device=cpu,openmp=TRUE,floatX=float32"
 comm = MPI.COMM_WORLD
@@ -20,6 +21,7 @@ n_iteration = 100
 EPSILON = 10**-4
 eta = 0.1  ## learning rate
 penalty_parameter=0.01
+n_nodes = [42,24,12,1] # number of units per layer
 
 
 def gradient(X,Y,w1,w2,w3,b1,b2,b3,batchsize,penalty):
@@ -132,6 +134,12 @@ w3 = np.ones([num_neutron_2,output_col])
 b1 = np.zeros(num_neutron_1)
 b2 = np.zeros(num_neutron_2)
 b3 = np.zeros(output_col)
+w1_temp = np.ones([input_col,num_neutron_1])
+w2_temp = np.ones([num_neutron_1,num_neutron_2])
+w3_temp = np.ones([num_neutron_2,output_col])
+b1_temp = np.zeros(num_neutron_1)
+b2_temp = np.zeros(num_neutron_2)
+b3_temp = np.zeros(output_col)
 dw1 = np.empty([input_col,num_neutron_1])
 dw2 = np.empty([num_neutron_1,num_neutron_2])
 dw3 = np.empty([num_neutron_2,output_col])
@@ -143,14 +151,8 @@ if rank == 0:
     fout = open("out_{}_MPI_SGD".format(size), "w")
     iteration = 0
     l_old = -1 #loss
-    cache_dw1 = np.zeros([input_col,num_neutron_1])
-    cache_dw2 = np.zeros([num_neutron_1,num_neutron_2])
-    cache_dw3 = np.zeros([num_neutron_2,output_col])
-    cache_db1 = np.zeros(num_neutron_1)
-    cache_db2 = np.zeros(num_neutron_2)
-    cache_db3 = np.zeros(output_col)
     while True:               
-        l_new, _ = lossfunc(subdata[:,1:],subdata[:,0],w1,w2,w3,b1,b2,b3)##############
+        l_new, pred_y = lossfunc(subdata[:,1:],subdata[:,0],w1,w2,w3,b1,b2,b3)##############
         #print "loss", l_new
         epsilon = abs(l_new - l_old)
         l_old = l_new
@@ -158,24 +160,12 @@ if rank == 0:
                 break
         status = MPI.Status()
         dw1,dw2,dw3,db1,db2,db3 = comm.recv(source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG,status=status)
-        cache_dw1 += dw1**2
-        cache_dw2 += dw2**2
-        cache_dw3 += dw3**2
-        cache_db1 += db1**2
-        cache_db2 += db2**2
-        cache_db3 += db3**2
-        eta_w1=eta/np.sqrt(cache_dw1)
-        eta_w2=eta/np.sqrt(cache_dw2)
-        eta_w3=eta/np.sqrt(cache_dw3)
-        eta_b1=eta/np.sqrt(cache_db1)
-        eta_b2=eta/np.sqrt(cache_db2)
-        eta_b3=eta/np.sqrt(cache_db3)
-        w1 = w1 - np.multiply(dw1, eta_w1)
-        w2 = w2 - np.multiply(dw2, eta_w2)
-        w3 = w3 - np.multiply(dw3, eta_w3)
-        b1 = b1 - np.multiply(db1, eta_w1)
-        b2 = b2 - np.multiply(db2, eta_w2)
-        b3 = b3 - np.multiply(db3, eta_w3)
+        w1 = w1 - dw1
+        w2 = w2 - dw2
+        w3 = w3 - dw3
+        b1 = b1 - db1
+        b2 = b2 - db2
+        b3 = b3 - db3
         comm.send([w1,w2,w3,b1,b2,b3],dest=status.Get_source(),tag=0)
         #print "dw from worker {}".format(status.Get_source())
         print "{},{}".format(l_new,status.Get_source())
@@ -188,12 +178,50 @@ if rank == 0:
     l_new, pred_y = lossfunc(data_test[:,1:],data_test[:,0],w1,w2,w3,b1,b2,b3)
     print((sum(np.dot((pred_y>0)*1,(data_test[:,0]>0)*1))+sum(np.dot((pred_y<0)*1,(data_test[:,0]<0)*1)))/data_test.shape[0])
 
-
 else:
+    cache_dw1 = np.zeros([input_col,num_neutron_1])
+    cache_dw2 = np.zeros([num_neutron_1,num_neutron_2])
+    cache_dw3 = np.zeros([num_neutron_2,output_col])
+    cache_db1 = np.zeros(num_neutron_1)
+    cache_db2 = np.zeros(num_neutron_2)
+    cache_db3 = np.zeros(output_col)
     while True:
-        _,dw1,dw2,dw3,db1,db2,db3 = gradient(subdata[:,1:],subdata[:,0],w1,w2,w3,b1,b2,b3,1024,penalty_parameter) ## batchsize=50, penalty parameter=1
+        for j in range(20): 
+            model = keras_NN(n_nodes=n_nodes,optimizer='adagrad')
+            current_weight = model.get_weights() 
+            w1_temp,b1_temp,w2_temp, b2_temp,w3_temp,b3_temp = kg.get_keras_gradients(subdata[:,1:],subdata[:,0],current_weight,model) ## batchsize=50, penalty parameter=1
+            cache_dw1 += dw1**2
+            cache_dw2 += dw2**2
+            cache_dw3 += dw3**2
+            cache_db1 += db1**2
+            cache_db2 += db2**2
+            cache_db3 += db3**2
+            eta_w1=eta/np.sqrt(cache_dw1)
+            eta_w2=eta/np.sqrt(cache_dw2)
+            eta_w3=eta/np.sqrt(cache_dw3)
+            eta_b1=eta/np.sqrt(cache_db1)
+            eta_b2=eta/np.sqrt(cache_db2)
+            eta_b3=eta/np.sqrt(cache_db3)
+            w1_temp = w1_temp - np.multiply(dw1, eta_w1)
+            w2_temp = w2_temp - np.multiply(dw2, eta_w2)
+            w3_temp = w3_temp - np.multiply(dw3, eta_w3)
+            b1_temp = b1_temp - np.multiply(db1, eta_b1)
+            b2_temp = b2_temp - np.multiply(db2, eta_b2)
+            b3_temp = b3_temp - np.multiply(db3, eta_b3)
+        dw1 = -w1_temp + w1
+        dw2 = -w2_temp + w2
+        dw3 = -w3_temp + w3
+        db1 = -b1_temp + b1
+        db2 = -b2_temp + b2
+        db3 = -b3_temp + b3
         comm.send([dw1,dw2,dw3,db1,db2,db3], dest=0, tag=1)
         status = MPI.Status()
         w1,w2,w3,b1,b2,b3 = comm.recv(source=0,tag=MPI.ANY_TAG,status=status)
+        w1_temp = w1
+        w2_temp = w2
+        w3_temp = w3
+        b1_temp = b1
+        b2_temp = b2
+        b3_temp = b3
         if status.Get_tag() == DIETAG:
             break
