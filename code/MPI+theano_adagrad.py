@@ -166,7 +166,7 @@ if rank == 0:
         epsilon = abs(l_new - l_old)
         l_old = l_new
         if iteration == n_iteration or epsilon < EPSILON:
-                break
+            break
         status = MPI.Status()
         print "dw from worker {}".format(status.Get_source())
 
@@ -201,27 +201,22 @@ if rank == 0:
 # workers: receive parameters, return gradients
 else:
     while True:
-        start = time.time()
+        #start = time.time()
         # we can tune these such that roughly num_batches * batchsize ~= subdata.shape[0]
-        
-        num_batches = 1
+        num_batches = 20
         batchsize = subdata.shape[0] / num_batches
-
-        new_grad_list = [np.zeros_like(w) for w in param_list]
-        
+        new_grad_list = [np.zeros_like(w) for w in param_list]     
 
         # for each batch, sum over all the gradients of batches and then 
         for ii in range(num_batches):
-            batch = subdata[ ii * batchsize : min((ii + 1) * batchsize ,subdata.shape[0]) ]
-            grad_list = gradient(batch[:,:42],batch[:,-1], *param_list) ## batchsize=50, penalty parameter=1
+            batch = subdata[ ii * batchsize : min((ii + 1) * batchsize ,subdata.shape[0]), ]
+            grad_list = gradient(batch[:,2:],batch[:,0], *param_list) ## batchsize=50, penalty parameter=1
             for iii,g in enumerate(grad_list):
                 new_grad_list[iii] += g
 
         # scale down the gradient if they are not rescaled in gradient function
-        new_grad_list = [g/num_batches/batchsize for g in new_grad_list[:]]
-
-
-        print 'worker ',rank,'computes gradient and takes time:',time.time()-start 
+        new_grad_list = [g/num_batches for g in new_grad_list]
+        #print 'worker ',rank,'computes gradient and takes time:',time.time()-start 
         comm.send(new_grad_list, dest=0, tag=1)
         status = MPI.Status()
         param_list = comm.recv(source=0,tag=MPI.ANY_TAG,status=status)
