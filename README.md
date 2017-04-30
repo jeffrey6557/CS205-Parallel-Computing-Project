@@ -28,9 +28,9 @@ The output is the predicted return at minute t+1 for stock j. We normalize all t
 
 ### Neural Network Architecture
 
-For the prediction method, multi-layer Artificial Neural Networks (ANN) using back-propagation algorithm has shown promising results in stock index prices compared with traditional methods [1]. Note that the traditional gradient descent algorithm of back-propagation is sequential by nature. We will therefore apply a technique that combines MPI with **three differerent parallelizable algorithms** to parallelize the training process: asynchronized multiple sub-neural networks[3] with nested parallel batch Stochastic Gradient Descent[2]. 
+For the prediction method, multi-layer Artificial Neural Networks (ANN) using back-propagation algorithm has shown promising results in stock index prices compared with traditional methods [1]. Note that the traditional gradient descent algorithm of back-propagation is sequential by nature. We will therefore apply a technique that combines MPI with **three differerent parallelizable algorithms** to parallelize the training process: asynchronized multiple sub-neural networks[3] with nested parallel batch Stochastic Gradient Descent[2].
 
-The initial goal of our project was to implement a two-level parallelization model by combining MPI and OpenMP. Unfortunately, developing executable code using OpenMP (via Cython) resulted in an onerous and difficult task, therefore, we opted for existing Python neural network packages that could run in parallel. Nonetheless, we describe our desired design and the design we used for our project below.
+The initial goal of our project was to implement a two-level parallelization model by combining MPI and OpenMP. Unfortunately, developing executable code using OpenMP (via Cython) resulted in an onerous and difficult task, therefore, we opted for existing optimization algorithms for the update of gradients, then analyzing the nature of our algorithm by comparing time until convergence. Nonetheless, we describe our desired design and the design we used for our project below.
 
 ### Neural Network Architecture (hyperparameters)
 
@@ -44,7 +44,7 @@ We implement a **fully connected** network with:
 
 ### Parallelism Architecture
 
-We execute data and model parallelism at two levels. Firstly, each machine (e.g. an Odyssey node) will store a Data Shard (a subset of data) and train a model replica independently and asynchronously (see Figure 1.) Each replica will fetch weights (𝑤) from the parameter server (the master node), compute ∆𝑤 with SGD, and push ∆𝑤 to the server. The parameter server updates the parameter set whenever it receives ∆𝑤 from a model replica. We implemented this level with MPI (`mpi4py` package).
+We execute data and model parallelism at two levels. Firstly, each machine (e.g. an Odyssey node) will store a Data Shard (a subset of data) and train a model replica independently and asynchronously (see Figure 1.) Each replica will fetch weights (𝑤) from the parameter server (the master node), compute ∆𝑤, and push ∆𝑤 to the server or master node. The parameter server updates the parameter set, whenever it receives ∆𝑤 from a model replica. We analyzed three different optimization algorithms for the update of the weights. The fetching and pushing weights and gradient weights to the master node was implemented with MPI (`mpi4py` package).
 
 # Data and Model Parallelism 
 
@@ -52,42 +52,41 @@ We execute data and model parallelism at two levels. Firstly, each machine (e.g.
 
 *Figure 1: Parallelised Neural Network Architecture [3]. Model replicas asynchronously fetch parameters 𝑤 and push ∆𝑤 to the parameter server.*
 
-Secondly, each model replica computes ∆𝑤 by averaging the mini-batch gradients from 64 or 32 (depend on number of cores in a node) parallel threads (see Figure 2). We attempted to implement this level with OpenMP (Cython parallel module). However, we were unsuccessful with this implementation, so we used other algorithms mentioned below. 
+Secondly, each model replica computes ∆𝑤 by averaging the mini-batch gradients from 64 or 32 (depend on number of cores in a node) parallel threads (see Figure 2). We attempted to implement this level with OpenMP (Cython parallel module). However, we were unsuccessful with this implementation, so we used OpenMP/CUDA for BLAS in each model replica and tested at different cores. 
 
 # Parallelism in Gradient Computation
 ![architecture](images/architecture.png)
 *Figure 2: Desired parallelization in each model replica.*
 
-## Model replica algorithms (optimization methods)
+## Optimization methods
 
-Due to the lack of success in our OpenMP algorithm, we used the algorithms listed below. 
-
-- **Stochastic Gradient Descent (SGD)**: stochastic approximation of the gradient descent optimization method that finds minima or maxima by iteration. 
-- **Adam**: the learning rate is adapted for each of the parameters. Running averages of both the gradients and the second moments of the gradients are used to update parameters.
-- **Adaptive Gradient Algorithm (AdaGrad)**: modified SGD with parameter learning rate. Informally, this increases the learning rate for more sparse parameters and decreases the learning rate for less sparse ones. This strategy improves convergence performance where data is sparse. 
+- **Adaptive Gradient Algorithm (AdaGrad)**: modified SGD with parameter learning rate. Informally, this increases the learning rate for more sparse parameters and decreases the learning rate for less sparse ones. This strategy improves convergence performance where data is sparse. This optimization method is run with MPI arhitecture (see *Figure 3*)
 - **Hessian-Free (Truncated Newton Method)**: an approximation of the Hessian is calculated, which saves time and computational resources, when updating using the well known Newton method. 
+- **Particle Swarm Optimization (PSO)**: computational method that solves a problem by having a population of candidate solutions, or particles, and moving these around in the search-space according to simple mathematical formulae over the particle's position and velocity. Each particle's movement is influenced by its local best known position, but is also guided toward the best known positions in the search-space, which are updated as better positions are found by other particles. This is expected to move the swarm toward the best solutions.
 
-SGD is implemented using the Python package [Theano](http://deeplearning.net/software/theano/), Adam and AdaGrad are implemented using [Keras](https://keras.io), and Hessian-free is applied using [hessianfree](http://pythonhosted.org/hessianfree/index.html).
+AdaGrad is implemented using [Keras](https://keras.io), and Hessian-free is applied using [hessianfree](http://pythonhosted.org/hessianfree/index.html).
 
 ![true architecture](images/true_architecture.png)
 
-*Figure 3: Real architecture of our algorithm. Note that Adam, AdaGrad, Hessian-Free are optimization methods that can be run in parallel through OpenMP. Each of these optimization methods can also be run sequentially, which will be our baseline when comparing the competence of our parallelization.*
+*Figure 3: Real architecture of our algorithm. Note that node 0 is the master node, where the optimization takes place, and node 1 through 7 (number of total nodes can and will vary) is a model replica, where the calculationg of the gradient of weight occurs.*
 
 ## Methods and Results
 
-### Simulations for performance analysis
+### Model Combinations 
 
-We tested our two levels of parallelizations separately and then combined via simulation.
+We build the following comibnations 
+
+# *ERASE EVERYTHING DOWN FROM HERE*
 
 1. MPI accuracy
-2. Parallelizable ANN algorithms within a model replica
+2. Optimization algorithms in the master node
     - SGD
-    - Adam 
+    - ADA 
     - AdaGrad
     - Hessian-Free
 3. Combined models:
     - MPI + SGD
-    - MPI + Adam
+    - MPI + ADA
     - MPI + AdaGrad
     - MPI + Hessian-Free
 
@@ -110,8 +109,6 @@ The decrease in the loss between predicted and observed outcomes and the converg
 We test the performance of a single model replica using each of the model replica algorithms versus CUDA implementation on predicting minute-level stock returns of Goldman Sachs in 2016. With an input size of 100,000 observations, we train a model with 75% of the stock prices and test it on the rest of the data. The batch size is 1,024 per model replica, a neural network has 3 hidden layers with 24, 12, 6 neurons, respectively. The maximum number of epochs (loosely defined as an iteration over iterations) was set to 100, and the initial learning rate is 0.001. The activation function is Relu except on the last layer, the output, where the activation function is linear. Below we show the average running time of the algorithms, including CUDA, which still outperforms the other optimization methods. We ran a total of 100 models for each algorithm.
 
 ![all times](images/experiment4_times.png)
-
-# *FINISH FROM HERE*
 
 <!-- Secondly, we tested the performance of a single model replica using OpenMP versus CUDA implementation on predicting minute-level stock returns of Goldman Sachs in 2016. We trained a fully-connected neural network with 4 layers (# units = [42,24,12,1]) and stop training once validation is not improving for 5 epochs. For speedup experiments, epochs are set to 100. 
 
