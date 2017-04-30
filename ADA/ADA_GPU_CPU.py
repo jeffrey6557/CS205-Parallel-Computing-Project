@@ -4,7 +4,7 @@ import theano
 import theano.tensor as T
 import time
 
-
+time1=time.time()
 input_col = 42
 num_neutron_1 = 24
 num_neutron_2 = 12
@@ -56,10 +56,10 @@ def lossfunc(X,Y,w1,w2,w3,b1,b2,b3):
     L12 = T.dot(L01, w12) + b12 
     L23 = T.dot(L12, w23) + b23
     loss = T.mean((y-L23)**2)
-    f = theano.function(inputs=[x,y], outputs=[loss],name='f')
+    f = theano.function(inputs=[x,y], outputs=[loss,L23],name='f')
     Y = np.reshape(Y,[nrow,1])
-    loss = np.asscalar(f(X,Y)[0])
-    return [loss, L23]
+    loss,pred_y = f(X,Y)
+    return [np.asscalar(loss), np.array([pred_y[i][0] for i in range(nrow)])]
 
 
 data_train = np.genfromtxt('price_inputs_GS2016_train.csv',delimiter=',',skip_header=1)[:,1:]
@@ -78,7 +78,6 @@ b1 = np.zeros(num_neutron_1)
 b2 = np.zeros(num_neutron_2)
 b3 = np.zeros(output_col)
 
-time1=time.time()
 cache_dw1 = np.zeros([input_col,num_neutron_1])
 cache_dw2 = np.zeros([num_neutron_1,num_neutron_2])
 cache_dw3 = np.zeros([num_neutron_2,output_col])
@@ -116,8 +115,9 @@ for i in range(k):
     b3 = b3 - np.multiply(db3, eta_b3)
 
 time2=time.time()
-
 print(loss_vec)
 print(time2-time1)
-l_new, pred_y = lossfunc(X_test,Y_test,w1,w2,w3,b1,b2,b3)
-print((sum(np.dot((pred_y>0)*1,(Y_test[:,0]>0)*1))+sum(np.dot((pred_y<0)*1,(Y_test<0)*1)))/X_test.shape[0])
+loss, pred_y = lossfunc(X_test,Y_test,w1,w2,w3,b1,b2,b3)
+correct=[(pred_y[i]*Y_test[i]>0)*1 for i in range(len(pred_y))]
+accuracy=sum(correct)/len(pred_y)
+print(accuracy)
