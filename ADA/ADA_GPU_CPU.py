@@ -119,5 +119,5 @@ print(loss_vec)
 print(time2-time1)
 loss, pred_y = lossfunc(X_test,Y_test,w1,w2,w3,b1,b2,b3)
 correct=[(pred_y[i]*Y_test[i]>0)*1 for i in range(len(pred_y))]
-accuracy=sum(correct)/len(pred_y)
+accuracy=sum(correct)/float(len(pred_y))
 print(accuracy)

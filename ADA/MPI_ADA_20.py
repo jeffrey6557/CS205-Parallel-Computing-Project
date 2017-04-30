@@ -176,7 +176,7 @@ if rank == 0:
     time2=time.time()
     loss, pred_y = lossfunc(data_test[:,1:],data_test[:,0],w1,w2,w3,b1,b2,b3)
     correct=[(pred_y[i]*data_test[i,0]>0)*1 for i in range(len(pred_y))]
-    accuracy=sum(correct)/len(pred_y)
+    accuracy=sum(correct)/float(len(pred_y))
     print(time2-time1)
     print(accuracy)
 
