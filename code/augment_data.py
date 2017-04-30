@@ -1,7 +1,7 @@
 import numpy as np
 
 def augment_data(data,n_boot = 500):
-    
+    '''generate n_boot number of bootstrap samples '''
     res = data.copy()
     for i in range(n_boot):
         index = np.random.choice(range(data.shape[0]),size = data.shape[0])   
