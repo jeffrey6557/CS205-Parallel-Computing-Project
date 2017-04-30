@@ -5,6 +5,7 @@ import theano
 import theano.tensor as T
 from theano import function, config, shared, sandbox
 import os
+import time
 
 time1=time.time()
 os.environ["THEANO_FLAGS"] = "device=cpu,openmp=TRUE,floatX=float32"
