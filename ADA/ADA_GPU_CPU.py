@@ -62,8 +62,8 @@ def lossfunc(X,Y,w1,w2,w3,b1,b2,b3):
     return [np.asscalar(loss), np.array([pred_y[i][0] for i in range(nrow)])]
 
 
-data_train = np.genfromtxt('price_inputs_GS2016_train.csv',delimiter=',',skip_header=1)[:,1:]
-data_test = np.genfromtxt('price_inputs_GS2016_test.csv',delimiter=',',skip_header=1)[:,1:]
+data_train = np.genfromtxt('second_level_inputs_GS2016_train.csv',delimiter=',',skip_header=1)[:,1:]
+data_test = np.genfromtxt('second_level_inputs_GS2016_test.csv',delimiter=',',skip_header=1)[:,1:]
 X_train=data_train[:int(np.ceil(0.8*data_train.shape[0])),1:]
 Y_train=data_train[:int(np.ceil(0.8*data_train.shape[0])),0]
 X_valid=data_train[int(np.ceil(0.8*data_train.shape[0])):,1:]

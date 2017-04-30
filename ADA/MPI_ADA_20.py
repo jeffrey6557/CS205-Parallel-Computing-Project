@@ -76,8 +76,8 @@ def lossfunc(X,Y,w1,w2,w3,b1,b2,b3):
 
 if rank == 0:
     #data = pd.read_csv("test_data.csv",header=-1)
-    data_train = np.genfromtxt('price_inputs_GS2016_train.csv',delimiter=',',skip_header=1)[:,1:]
-    data_test = np.genfromtxt('price_inputs_GS2016_test.csv',delimiter=',',skip_header=1)[:,1:]
+    data_train = np.genfromtxt('second_level_inputs_GS2016_train.csv',delimiter=',',skip_header=1)[:,1:]
+    data_test = np.genfromtxt('second_level_inputs_GS2016_test.csv',delimiter=',',skip_header=1)[:,1:]
     #X,ret = data[:,2:],data[:,1:2] # X means features, ret means target 
     [nrow, ncol] = data_train.shape
     data_train=data_train.flatten()
