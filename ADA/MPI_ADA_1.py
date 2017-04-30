@@ -19,7 +19,7 @@ DIETAG = 666
 n_iteration = 100
 EPSILON = 10**-4
 eta = 0.1  ## learning rate
-penalty_parameter=0.1
+penalty_parameter=0.01
 
 
 def gradient(X,Y,w1,w2,w3,b1,b2,b3,batchsize,penalty):
@@ -138,7 +138,6 @@ db2 = np.empty(num_neutron_2)
 db3 = np.empty(output_col)
 
 if rank == 0:
-    fout = open("out_{}_MPI_SGD".format(size), "w")
     iteration = 0
     l_old = -1 #loss
     cache_dw1 = np.zeros([input_col,num_neutron_1])
@@ -183,13 +182,13 @@ if rank == 0:
     for r in range(1, size):
         comm.send([0]*6, dest=r, tag=DIETAG)
 
-    l_new, pred_y = lossfunc(data_test[:,1:],data_test[:,0],w1,w2,w3,b1,b2,b3)
+    loss, pred_y = lossfunc(data_test[:,1:],data_test[:,0],w1,w2,w3,b1,b2,b3)
     print((sum(np.dot((pred_y>0)*1,(data_test[:,0]>0)*1))+sum(np.dot((pred_y<0)*1,(data_test[:,0]<0)*1)))/data_test.shape[0])
 
 
 else:
     while True:
-        loss1,dw1,dw2,dw3,db1,db2,db3 = gradient(subdata[:,1:],subdata[:,0],w1,w2,w3,b1,b2,b3,1024,penalty_parameter) ## batchsize=50, penalty parameter=1
+        loss,dw1,dw2,dw3,db1,db2,db3 = gradient(subdata[:,1:],subdata[:,0],w1,w2,w3,b1,b2,b3,1024,penalty_parameter) ## batchsize=50, penalty parameter=1
         comm.send([dw1,dw2,dw3,db1,db2,db3], dest=0, tag=1)
         status = MPI.Status()
         w1,w2,w3,b1,b2,b3 = comm.recv(source=0,tag=MPI.ANY_TAG,status=status)

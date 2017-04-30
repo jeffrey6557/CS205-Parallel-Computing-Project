@@ -18,8 +18,8 @@ output_col=1
 DIETAG = 666
 n_iteration = 100
 EPSILON = 10**-4
-eta = 0.5  ## learning rate
-penalty_parameter=0.1
+eta = 0.1  ## learning rate
+penalty_parameter=0.01
 
 
 def gradient(X,Y,w1,w2,w3,b1,b2,b3,batchsize,penalty):
