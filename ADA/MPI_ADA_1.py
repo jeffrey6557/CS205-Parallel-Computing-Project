@@ -193,7 +193,7 @@ if rank == 0:
 
 else:
     while True:
-        loss,dw1,dw2,dw3,db1,db2,db3 = gradient(subdata[:,1:],subdata[:,0],w1,w2,w3,b1,b2,b3,1024,penalty_parameter) 
+        loss,dw1,dw2,dw3,db1,db2,db3 = gradient(subdata[:,1:],subdata[:,0],w1,w2,w3,b1,b2,b3,1024) 
         comm.send([dw1,dw2,dw3,db1,db2,db3], dest=0, tag=1)
         status = MPI.Status()
         w1,w2,w3,b1,b2,b3 = comm.recv(source=0,tag=MPI.ANY_TAG,status=status)

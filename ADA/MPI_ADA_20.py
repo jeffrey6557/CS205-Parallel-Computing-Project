@@ -190,7 +190,7 @@ else:
     loss0 = 0
     while True:
         for j in range(20): 
-            loss1,dw1,dw2,dw3,db1,db2,db3 = gradient(subdata[:,1:],subdata[:,0],w1_temp,w2_temp,w3_temp,b1_temp,b2_temp,b3_temp,1024,penalty_parameter) ## batchsize=50, penalty parameter=1
+            loss1,dw1,dw2,dw3,db1,db2,db3 = gradient(subdata[:,1:],subdata[:,0],w1_temp,w2_temp,w3_temp,b1_temp,b2_temp,b3_temp,1024) 
             if(abs(loss0-loss1)<EPSILON):
                 break
             loss0=loss1

@@ -94,7 +94,7 @@ for i in range(k):
         print(i)
         break
     loss0=loss1
-    loss,dw1,dw2,dw3,db1,db2,db3 = gradient(X_train,Y_train,w1,w2,w3,b1,b2,b3,1024,penalty_parameter)
+    loss,dw1,dw2,dw3,db1,db2,db3 = gradient(X_train,Y_train,w1,w2,w3,b1,b2,b3,1024)
     cache_dw1 += dw1**2
     cache_dw2 += dw2**2
     cache_dw3 += dw3**2
