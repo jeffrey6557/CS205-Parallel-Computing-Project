@@ -7,7 +7,6 @@ Chang Liu, Greyson Liu, Kamrine Poels, Linglin Huang
 ## Background
 Despite the availability of high-frequency stock market data, its use in forecasting stock prices is studied to a lesser extent. Similarly, despite the recent success of neural network on as a forecasting method, its power in forecasting high-frequency dynamics has been relatively overlooked. In addition, most of the studies in the literature have been focused on stock market indices instead of individual stocks. A possible explanation is the intractable computational intensity of training neural networks on the massive volume of high-frequency data of individual stocks. This motivates our study on applying parallelism to the training task and evaluate its performance to demonstrate weak and strong scaling. 
 
-
 ## Data
 We formulate the task as a prediction problem, using lagged previous prices of individual stocks to predict future prices at the minute level. The high-frequency consolidated trade data for the US equity market comes from NYSE Trade and Quote (TAQ) database, available by the WRDS research center. 
 
@@ -28,9 +27,9 @@ The output is the predicted return at minute t+1 for stock j. We normalize all t
 
 ### Neural Network Architecture
 
-For the prediction method, multi-layer Artificial Neural Networks (ANN) using back-propagation algorithm has shown promising results in stock index prices compared with traditional methods [1]. Note that the traditional gradient descent algorithm of back-propagation is sequential by nature. We will therefore apply a technique that combines MPI with **three differerent parallelizable algorithms** to parallelize the training process: asynchronized multiple sub-neural networks[3] with nested parallel batch Stochastic Gradient Descent[2].
+For the prediction method, multi-layer Artificial Neural Networks (ANN) using back-propagation algorithm has shown promising results in stock index prices compared with traditional methods [1]. Note that the traditional gradient descent algorithm of back-propagation is sequential by nature. We will therefore apply a technique that combines MPI with OpenMP/CUDA for BLAS to parallelize the training process: asynchronized multiple sub-neural networks[3] with nested parallel batch <span style="color:red"> **Stochastic Gradient Descent** </span>[2].
 
-The initial goal of our project was to implement a two-level parallelization model by combining MPI and OpenMP. Unfortunately, developing executable code using OpenMP (via Cython) resulted in an onerous and difficult task, therefore, we opted for existing optimization algorithms for the update of gradients, then analyzing the nature of our algorithm by comparing time until convergence. Nonetheless, we describe our desired design and the design we used for our project below.
+The goal of our project is to implement a two-level parallelization model by combining MPI and OpenMP/CUDA. Unfortunately, developing executable code using OpenMP (via Cython) resulted in an onerous and difficult task, therefore, we opted for existing optimization algorithms for the update of gradients, then analyzing the nature of our algorithm by comparing time until convergence. Nonetheless, we describe our desired design and the design we used for our project below.
 
 ### Neural Network Architecture (hyperparameters)
 
@@ -52,7 +51,7 @@ We execute data and model parallelism at two levels. Firstly, each machine (e.g.
 
 *Figure 1: Parallelised Neural Network Architecture [3]. Model replicas asynchronously fetch parameters 𝑤 and push ∆𝑤 to the parameter server.*
 
-Secondly, each model replica computes ∆𝑤 by averaging the mini-batch gradients from 64 or 32 (depend on number of cores in a node) parallel threads (see Figure 2). We attempted to implement this level with OpenMP (Cython parallel module). However, we were unsuccessful with this implementation, so we used OpenMP/CUDA for BLAS in each model replica and tested at different cores. 
+Secondly, each model replica aimed to compute ∆𝑤 by averaging the mini-batch gradients from 64 or 32 (depend on number of cores in a node) parallel threads (see Figure 2). We attempted to implement this level of parallelism with OpenMP (Cython parallel module). However, we were unsuccessful with this implementation, so we used OpenMP/CUDA for BLAS in each model replica and tested at different cores. 
 
 # Parallelism in Gradient Computation
 ![architecture](images/architecture.png)
@@ -61,7 +60,7 @@ Secondly, each model replica computes ∆𝑤 by averaging the mini-batch gradie
 ## Optimization methods
 
 - **Adaptive Gradient Algorithm (AdaGrad)**: modified SGD with parameter learning rate. Informally, this increases the learning rate for more sparse parameters and decreases the learning rate for less sparse ones. This strategy improves convergence performance where data is sparse. This optimization method is run with MPI arhitecture (see *Figure 3*)
-- **Hessian-Free (Truncated Newton Method)**: an approximation of the Hessian is calculated, which saves time and computational resources, when updating using the well known Newton method. 
+- **Hessian-Free (Truncated Newton Method)**: an approximation of the Hessian is calculated, which saves time and computational resources, when updating using the well known Newton method. This optimization was parallelized using GPU <span style="color:red"> **due to difficulties when implementing with OpenMP.** </span>
 - **Particle Swarm Optimization (PSO)**: computational method that solves a problem by having a population of candidate solutions, or particles, and moving these around in the search-space according to simple mathematical formulae over the particle's position and velocity. Each particle's movement is influenced by its local best known position, but is also guided toward the best known positions in the search-space, which are updated as better positions are found by other particles. This is expected to move the swarm toward the best solutions.
 
 AdaGrad is implemented using [Keras](https://keras.io), and Hessian-free is applied using [hessianfree](http://pythonhosted.org/hessianfree/index.html).
@@ -72,25 +71,25 @@ AdaGrad is implemented using [Keras](https://keras.io), and Hessian-free is appl
 
 ## Methods and Results
 
-### Model Combinations 
+### Outline of Models
 
-We build the following comibnations 
+### Hessian-Free
 
-# *ERASE EVERYTHING DOWN FROM HERE*
+## Adagrad
 
-1. MPI accuracy
-2. Optimization algorithms in the master node
-    - SGD
-    - ADA 
-    - AdaGrad
-    - Hessian-Free
-3. Combined models:
-    - MPI + SGD
-    - MPI + ADA
-    - MPI + AdaGrad
-    - MPI + Hessian-Free
+#### Sequential
 
-#### Performance metrics of simulations using MPI
+#### GPU
+
+#### MPI + AdaGrad
+
+##### Varying number of nodes
+
+## PSO
+
+### PSO 
+
+# *END HERE*
 
 First, we test the correctness of MPI implementation with data generated from a simple linear model. This is a reasonable *naïve* test case because ANN with zero hidden layers reduces to a linear regression if the activation function is linear.
 
@@ -173,7 +172,7 @@ We evaluate our model with the following metrics:
     - Directional Accuracy (fraction of correct predictions of up and downs per model, consider thresholded on predicted values such that only large predicted values count)
     - Hit ratio
 
-<span style="color:red"> **Add figures for exercise 2 and 4.** </span>
+<span style="color:red"> **** </span>
 
 3. Computational cost	
     + Speedups, efficiencies, and throughputs (in Gflop/s) for different number of nodes, number of cores per core, different model size (# parameters).
