@@ -75,7 +75,9 @@ Within the training data, we use 80% of this dataset to train in the model repli
 
 We present the layout of our model combinations and their analysis. First, we are interested in observing time until convergence and convergence rate per iteration. <span style="color:red">**We also record and compare accuracy among the models.**</span>. 
 
-![Model table](images/model_table.png)
+<!-- ![Model table](images/model_table.png) -->
+
+<img src="images/model_table.png" alt="Model table" style="width: 200px;"/>
 
 *Table 1: We run Hessian-free and AdaGrad in GPU.*
 
