@@ -9,10 +9,11 @@ input_col = 42
 num_neutron_1 = 24
 num_neutron_2 = 12
 output_col=1 
-eta = 0.5
-penalty_parameter=0.1
+eta = 0.1
+l2_rate=0.01
+decay = 1 - l2_rate*eta/1024
 
-def gradient(X,Y,w1,w2,w3,b1,b2,b3,batchsize,penalty):
+def gradient(X,Y,w1,w2,w3,b1,b2,b3,batchsize):
     [nrow, ncol] = X.shape 
     index = np.random.choice(range(nrow),size=batchsize,replace=False)
     trainX = X[index,:]
@@ -29,15 +30,14 @@ def gradient(X,Y,w1,w2,w3,b1,b2,b3,batchsize,penalty):
     L01 = L01_temp*(L01_temp>0)
     L12 = T.dot(L01, w12) + b12 
     L23 = T.dot(L12, w23) + b23
-    loss = T.mean((y-L23)**2)  
-    cost = loss + penalty * ((w01**2).sum() + (w12**2).sum()+(w23**2).sum())  ## L2 penalty
+    cost = T.mean((y-L23)**2)  
     dw1 = T.grad(cost=cost, wrt=w01)
     dw2 = T.grad(cost=cost, wrt=w12)
     dw3 = T.grad(cost=cost, wrt=w23)
     db1 = T.grad(cost=cost, wrt=b01)
     db2 = T.grad(cost=cost, wrt=b12)
     db3 = T.grad(cost=cost, wrt=b23)    
-    train = theano.function(inputs=[x,y], outputs=[loss,dw1,dw2,dw3,db1,db2,db3],name='train')
+    train = theano.function(inputs=[x,y], outputs=[cost,dw1,dw2,dw3,db1,db2,db3],name='train')
     loss,gw1,gw2,gw3,gb1,gb2,gb3=train(trainX,trainY)
     return [loss,gw1,gw2,gw3,gb1,gb2,gb3]
 
@@ -71,9 +71,9 @@ Y_valid=data_train[int(np.ceil(0.8*data_train.shape[0])):,0]
 X_test= data_test[:,1:]
 Y_test= data_test[:,0]
 
-w1 = np.ones([input_col,num_neutron_1])
-w2 = np.ones([num_neutron_1,num_neutron_2])
-w3 = np.ones([num_neutron_2,output_col])
+w1 = np.random.normal(loc=0,scale=1./np.sqrt(input_col),size=(input_col,num_neutron_1))
+w2 = np.random.normal(loc=0,scale=1./np.sqrt(num_neutron_1),size=(num_neutron_1,num_neutron_2))
+w3 = np.random.normal(loc=0,scale=1./np.sqrt(num_neutron_2),size=(num_neutron_2,output_col))
 b1 = np.zeros(num_neutron_1)
 b2 = np.zeros(num_neutron_2)
 b3 = np.zeros(output_col)
@@ -107,7 +107,7 @@ for i in range(k):
     eta_b1=eta/np.sqrt(cache_db1)
     eta_b2=eta/np.sqrt(cache_db2)
     eta_b3=eta/np.sqrt(cache_db3)
-    w1 = w1 - np.multiply(dw1, eta_w1)
+    w1 = w1*decay - np.multiply(dw1, eta_w1)
     w2 = w2 - np.multiply(dw2, eta_w2)
     w3 = w3 - np.multiply(dw3, eta_w3)
     b1 = b1 - np.multiply(db1, eta_b1)
