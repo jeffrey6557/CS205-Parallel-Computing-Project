@@ -70,13 +70,13 @@ Secondly, each model replica aimed to compute ∆𝑤 by averaging the mini-batc
 
 AdaGrad is implemented using [Keras](https://keras.io), and Hessian-free is applied using [hessianfree](http://pythonhosted.org/hessianfree/index.html).
 
-We test the performance of all models on predicting minute-level stock returns of Goldman Sachs in 2016. With an input size of 100,000 observations, we train a model with 75% of the stock prices and test it on the rest of the data. The batch size is 1,024 or 4096 per model replica, a neural network has 3 hidden layers with 24, 12, 6 neurons, respectively. The maximum number of epochs (loosely defined as an iteration over iterations) was set to <span style="color:red">**100, and the initial learning rate is 0.001**</span>. The activation function is Relu except on the last layer, the output, where the activation function is linear. 
+We test the performance of all models on predicting minute-level stock returns of Goldman Sachs in 2016. With an input size of 100,000 observations, we train a model with 75% of the stock prices and test it on the rest of the data. The batch size is 1,024 or 4096 per model replica, a neural network has 2 hidden layers with 24, 12 neurons, respectively. The maximum number of epochs (loosely defined as the number of minibatch update) was set to <span style="color:red">**2000, and the initial learning rate is 0.01**</span>. The activation function is Relu except on the last layer, the output, where the activation function is linear. 
 
 Within the training data, we use 80% of this dataset to train in the model replicas. After ∆𝑤 is sent to the master node, 𝑤 is updated and used to test on the rest of the training data (other 20%). As predictions get closer to true outcomes (absolute difference of loss of (i+1) iteration and i iteration is less than 10e-4), the program is stopped and we deduced convergence. If predictions were distant from true values, training continued.
 
 #### Outline of Experiments
 
-We present the layout of our model combinations and their analysis. First, we are interested in observing time until convergence and convergence rate per iteration. <span style="color:red">**We also record and compare accuracy among the models.**</span>. 
+We present the layout of our model combinations and their analysis. First, we are interested in the observeded time until convergence and average time per iteration. <span style="color:red">**We also record and compare accuracy among the models.**</span>. 
 
 <!-- ![Model table](images/model_table.png) -->
 
