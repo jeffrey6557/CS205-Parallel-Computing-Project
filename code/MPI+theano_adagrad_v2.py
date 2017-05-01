@@ -20,7 +20,7 @@ l2_rate = 0.01 # regularization l2 rate
 eps = 10**-8 # error term in Adagrad
 
 # architecture
-n_nodes = [42,24,12,1]
+n_nodes = [420,240,120,1]
 # worker and master see param_list
 param_list = []
 # initialize random parameters in the order w1,w2,...b1,b2...
@@ -84,7 +84,7 @@ def lossfunc(X,Y,w1,w2,w3,b1,b2,b3):
 
 
 if rank == 0:
-    data_train = np.genfromtxt('second_level_inputs_GS2016_train.csv',delimiter=',',skip_header=1)[:,1:]
+    data_train = np.genfromtxt('expanded_second_level_inputs_GS2016_train.csv',delimiter=',',skip_header=1)[:,1:]
     data_test = np.genfromtxt('second_level_inputs_GS2016_test.csv',delimiter=',',skip_header=1)[:,1:]
     [nrow, ncol] = data_train.shape
     data_train=data_train.flatten()
