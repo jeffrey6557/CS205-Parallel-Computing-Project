@@ -202,7 +202,7 @@ def Solve(max_epochs, n, dim, minx, maxx,inertia, c1,c2,warm_start = 1):
 #                 r2 = rnd.random()
                 r1 = np.random.random()
                 r2 = np.random.random()
-                swarm[i].velocity[k] = ( (w * swarm[i].velocity[k]) +
+                swarm[i].velocity[k] = ( (inertia * swarm[i].velocity[k]) +
                       (c1 * r1 * (swarm[i].best_part_pos[k] - 
                                   swarm[i].position[k])) +  
                       (c2 * r2 * (best_swarm_pos[k] -
