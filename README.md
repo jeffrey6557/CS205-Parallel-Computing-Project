@@ -23,7 +23,7 @@ Technical indicators of price series includes:
  
 The output is the predicted return at minute t+1 for stock j. We normalize all the input and output variables using z-score and unit norm per feature:
 
-## Methodology and Parallelisation
+## Methods
 
 ### Neural Network Architecture
 
@@ -59,7 +59,7 @@ Secondly, each model replica aimed to compute ∆𝑤 by averaging the mini-batc
 
 - **Adaptive Gradient Algorithm (AdaGrad)**: modified SGD with parameter learning rate. Informally, this increases the learning rate for more sparse parameters and decreases the learning rate for less sparse ones. This strategy improves convergence performance where data is sparse. This optimization method is run with MPI arhitecture (see *Figure 3*)
 - **Hessian-Free (Truncated Newton Method)**: an approximation of the Hessian is calculated, which saves time and computational resources, when updating using the well known Newton method. This optimization was parallelized using GPU <span style="color:red"> **due to difficulties when implementing with OpenMP.** </span>
-- **Particle Swarm Optimization (PSO)**: computational method that solves a problem by having a population of candidate solutions, or particles, and moving these around in the search-space according to simple mathematical formulae over the particle's position and velocity. Each particle's movement is influenced by its local best known position, but is also guided toward the best known positions in the search-space, which are updated as better positions are found by other particles. This is expected to move the swarm toward the best solutions.
+- <span style="color:red">**Particle Swarm Optimization (PSO)**</span>: computational method that solves a problem by having a population of candidate solutions, or particles, and moving these around in the search-space according to simple mathematical formulae over the particle's position and velocity. Each particle's movement is influenced by its local best known position, but is also guided toward the best known positions in the search-space, which are updated as better positions are found by other particles. This is expected to move the swarm toward the best solutions.
 
 AdaGrad is implemented using [Keras](https://keras.io), and Hessian-free is applied using [hessianfree](http://pythonhosted.org/hessianfree/index.html).
 
@@ -79,26 +79,13 @@ We present the layout of our model combinations and their analysis. First, we ar
 
 <img src="images/model_table.png" alt="Model table" style="width: 200px;"/>
 
-*Table 1: We run Hessian-free and AdaGrad in GPU.*
+*Table 1: We run Hessian-free and AdaGrad in GPU. Not included in this table, we also run AdaGrad with 3, 4, 5, 6, 7 and 8 cores at 4 cores each (using MPI), but we force an earlier stop (maximum 2000 iterations).*
 
 ## Results
 
+## Conclusions
 
-### Hessian-Free
-
-## Adagrad
-
-#### Sequential
-
-#### GPU
-
-#### MPI + AdaGrad
-
-##### Varying number of nodes
-
-## PSO
-
-### PSO 
+## Software 
 
 # *END HERE*
 
