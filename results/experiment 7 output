@@ -3,7 +3,7 @@ experiment 7
 
 # hessain free 
 Conjugate Gradient maximum iteration = 2,
-# convergence criterion, if max epoch = 2000 reached or validation_err[-1] > validation_err[-10]: therefore unknown number of epochs, but we can argue that to reach the similar convergence threshold, each models take the following seconds
+# convergence criterion, if max epoch = 2000 reached or validation_err[-1] > validation_err[-10]: therefore unknown number of epochs (guessestimate 40 epochs since we estimate ~1s/epoch based on laptop tests), but we can argue that to reach the similar convergence threshold, each models take the following seconds
 
 # Hessian free GPU, running time in seconds 
 GPU found, using Tesla K20Xm (3, 5)
@@ -110,7 +110,8 @@ GPU found, using Tesla K20Xm (3, 5)
 
 
 # hessian free GPU ( using Tesla K20Xm (3, 5) )
-# fixing 2000 epochs 
+# fixing 1000 epochs and can multiply by 2 to get 2000 epochs for comparison with other algo
+
 # Evaluating hessian free
 running time per trial 5669.19178391 (seconds)
 accuracy
