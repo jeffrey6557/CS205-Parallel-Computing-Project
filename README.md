@@ -77,7 +77,7 @@ We present the layout of our model combinations and their analysis. First, we ar
 
 ![Model table](images/model_table.png)
 
-*Table 1: We run Hessian-free and AdaGrad in GPU, *
+*Table 1: We run Hessian-free and AdaGrad in GPU.*
 
 ## Results
 
