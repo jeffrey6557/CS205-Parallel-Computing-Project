@@ -1,11 +1,12 @@
 import numpy as np
-import pandas as pd
+#import pandas as pd
 from mpi4py import MPI
 import theano
 import theano.tensor as T
 from theano import function, config, shared, sandbox
 import os
 import keras_gradient as kg
+import time
 
 os.environ["THEANO_FLAGS"] = "device=cpu,openmp=TRUE,floatX=float32"
 comm = MPI.COMM_WORLD
@@ -75,6 +76,20 @@ def lossfunc(X,Y,w1,w2,w3,b1,b2,b3):
     loss = np.asscalar(f(X,Y)[0])
     return [loss, L23]
 
+def lossfunc_2(X,Y,weights):
+    a = X
+    # forward prop
+    layers = len(weights)/2
+    for l in range(layers):
+#         print np.dot(X,weights[2*l])+ weights[2*l+1].reshape((1,-1))
+        z = np.dot(a,weights[2*l]) + weights[2*l+1].reshape((1,-1))  # n x p * p x m + 1 x m = n x m 
+        if l == layers-1:
+            a = z
+        else:
+            a = np.maximum(0,z)
+    return  np.mean( (Y-a)**2 ,axis=0).item()
+
+
 if rank == 0:
     #data = pd.read_csv("test_data.csv",header=-1)
     data_train = np.genfromtxt('price_inputs_GS2016_train.csv',delimiter=',',skip_header=1)[:,1:]
@@ -128,6 +143,7 @@ else:
 
 comm.Barrier()
 
+model = kg.keras_NN(n_nodes=n_nodes,optimizer='adagrad')
 w1 = np.ones([input_col,num_neutron_1])
 w2 = np.ones([num_neutron_1,num_neutron_2])
 w3 = np.ones([num_neutron_2,output_col])
@@ -151,14 +167,19 @@ if rank == 0:
     fout = open("out_{}_MPI_SGD".format(size), "w")
     iteration = 0
     l_old = -1 #loss
+    mpistart_time = time.time()
     while True:               
-        l_new, pred_y = lossfunc(subdata[:,1:],subdata[:,0],w1,w2,w3,b1,b2,b3)##############
+        # l_new, pred_y = lossfunc(subdata[:,1:],subdata[:,0],w1,w2,w3,b1,b2,b3)##############
+        l_new = lossfunc_2(subdata[:,1:],subdata[:,0:1],[w1,b1,w2,b2,w3,b3])##############
         #print "loss", l_new
+        # l_new = model.evaluate(subdata[:,1:],subdata[:,0],verbose=0,batchsize=1024)
+        
         epsilon = abs(l_new - l_old)
         l_old = l_new
         if iteration == n_iteration or epsilon < EPSILON:
                 break
         status = MPI.Status()
+        start = time.time()
         dw1,dw2,dw3,db1,db2,db3 = comm.recv(source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG,status=status)
         w1 = w1 - dw1
         w2 = w2 - dw2
@@ -166,17 +187,18 @@ if rank == 0:
         b1 = b1 - db1
         b2 = b2 - db2
         b3 = b3 - db3
+        print 'master ',rank,'updates parameters takes',time.time()-start
         comm.send([w1,w2,w3,b1,b2,b3],dest=status.Get_source(),tag=0)
         #print "dw from worker {}".format(status.Get_source())
-        print "{},{}".format(l_new,status.Get_source())
+        print (l_new,status.Get_source())
         iteration += 1
 
     #send message to let workers stop
     for r in range(1, size):
         comm.send([0]*6, dest=r, tag=DIETAG)
-
-    l_new, pred_y = lossfunc(data_test[:,1:],data_test[:,0],w1,w2,w3,b1,b2,b3)
-    print((sum(np.dot((pred_y>0)*1,(data_test[:,0]>0)*1))+sum(np.dot((pred_y<0)*1,(data_test[:,0]<0)*1)))/data_test.shape[0])
+    print 'mpi_time',time.time()-mpistart_time
+    #l_new, pred_y = lossfunc(data_test[:,1:],data_test[:,0],w1,w2,w3,b1,b2,b3)
+    #print((sum(np.dot((pred_y>0)*1,(data_test[:,0]>0)*1))+sum(np.dot((pred_y<0)*1,(data_test[:,0]<0)*1)))/data_test.shape[0])
 
 else:
     cache_dw1 = np.zeros([input_col,num_neutron_1])
@@ -186,10 +208,10 @@ else:
     cache_db2 = np.zeros(num_neutron_2)
     cache_db3 = np.zeros(output_col)
     while True:
+        start = time.time()
         for j in range(20): 
-            model = keras_NN(n_nodes=n_nodes,optimizer='adagrad')
-            current_weight = model.get_weights() 
-            w1_temp,b1_temp,w2_temp, b2_temp,w3_temp,b3_temp = kg.get_keras_gradients(subdata[:,1:],subdata[:,0],current_weight,model) ## batchsize=50, penalty parameter=1
+            current_weight = [w1,b1,w2,b2,w3,b3]
+            w1_temp,b1_temp,w2_temp, b2_temp,w3_temp,b3_temp = kg.get_keras_gradients(subdata[:,1:],subdata[:,0:1],current_weight,model) ## batchsize=50, penalty parameter=1
             cache_dw1 += dw1**2
             cache_dw2 += dw2**2
             cache_dw3 += dw3**2
@@ -214,6 +236,7 @@ else:
         db1 = -b1_temp + b1
         db2 = -b2_temp + b2
         db3 = -b3_temp + b3
+        print 'worker ',rank,'computes gradient and takes time:',time.time()-start 
         comm.send([dw1,dw2,dw3,db1,db2,db3], dest=0, tag=1)
         status = MPI.Status()
         w1,w2,w3,b1,b2,b3 = comm.recv(source=0,tag=MPI.ANY_TAG,status=status)

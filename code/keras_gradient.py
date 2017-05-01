@@ -10,23 +10,23 @@ from keras.callbacks import EarlyStopping
 from keras.regularizers import l1,l2
 from keras.constraints import maxnorm
 from keras.optimizers import SGD,Adam,RMSprop
-import pandas as pd
+# import pandas as pd
 import time
 from keras import backend as K
 import os
 
 
-# YOU NEED TO pip install hessianfree IF YOU DON'T HAVE THE MODULE
-import hessianfree as hf
-from hessianfree.loss_funcs import LossFunction
-from functools import wraps
+# # YOU NEED TO pip install hessianfree IF YOU DON'T HAVE THE MODULE
+# import hessianfree as hf
+# from hessianfree.loss_funcs import LossFunction
+# from functools import wraps
 
 
 
-# TO TURN GPU for Keras, set devic = cuda or gpu or gpu0 like this
-os.environ["THEANO_FLAGS"] = "device=cuda,openmp=1,floatX=float32" 
-# TO TURN ON OPENMP
-os.environ["THEANO_FLAGS"] = "device=cpu,openmp=1,floatX=float32" 
+# # TO TURN GPU for Keras, set devic = cuda or gpu or gpu0 like this
+# os.environ["THEANO_FLAGS"] = "device=cuda,openmp=1,floatX=float32" 
+# # TO TURN ON OPENMP
+# os.environ["THEANO_FLAGS"] = "device=cpu,openmp=1,floatX=float32" 
 
 
 def keras_NN(n_nodes,optimizer):
@@ -54,6 +54,8 @@ def keras_NN(n_nodes,optimizer):
        
        model.fit(X_tr,Y_tr,verbose=0,epochs=50,batch_size=1024,validation_split=0.2, callbacks=[early_stopping]): 
        
+       model.evaluate(X,Y,verbose=0,batch_size=1024)
+
        train a model with the inputs and the specification, you can train 1 epoch;  
        and return history of loss during training (using hist.history['loss']) and validation loss if callbacks =
        [EarlyStopping(patience=5)] (using hist.history['val_loss']) 
@@ -113,25 +115,23 @@ def get_keras_gradients(X,Y, weights,model):
 
 
 
+if __name__ == '__main__':
+  # data = np.genfromtxt('price_inputs_GS2016.csv',delimiter=',',skip_header=1)
+  print 'shape of total X and ret:',X.shape,ret.shape
 
-# read data and define training, validation and test set
-data = np.genfromtxt('price_inputs_GS2016.csv',delimiter=',',skip_header=1)
-X,ret = data[:,2:],data[:,1:2] # X means features, ret means target 
-print 'shape of total X and ret:',X.shape,ret.shape
-
-n_test = int(X.shape[0]*0.25)
-N = X.shape[0] - n_test
-n_val = int(N*0.2)
-X_tr_temp, X_test, ret_tr_temp,ret_test = X[:-n_test],X[-n_test:],ret[:-n_test],ret[-n_test:]
-X_tr,X_val,ret_tr,ret_val = X_tr_temp[:-n_val], X_tr_temp[-n_val:],ret_tr_temp[:-n_val],ret_tr_temp[-n_val:]
+  n_test = int(X.shape[0]*0.25)
+  N = X.shape[0] - n_test
+  n_val = int(N*0.2)
+  X_tr_temp, X_test, ret_tr_temp,ret_test = X[:-n_test],X[-n_test:],ret[:-n_test],ret[-n_test:]
+  X_tr,X_val,ret_tr,ret_val = X_tr_temp[:-n_val], X_tr_temp[-n_val:],ret_tr_temp[:-n_val],ret_tr_temp[-n_val:]
 
 
-n_nodes = [42,24,12,1] # number of units per layer
+  n_nodes = [42,24,12,1] # number of units per layer
 
 
-model = keras_NN(n_nodes=n_nodes,optimizer='adagrad')
+  model = keras_NN(n_nodes=n_nodes,optimizer='adagrad')
 
-# change this to what master gives
-current_weight = model.get_weights() 
+  # change this to what master gives
+  current_weight = model.get_weights() 
 
-get_keras_gradients(X_tr,ret_tr, current_weight, model)
+  get_keras_gradients(X_tr,ret_tr, current_weight, model)

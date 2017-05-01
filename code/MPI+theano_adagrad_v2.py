@@ -1,22 +1,23 @@
 import numpy as np
-import pandas as pd
+#import pandas as pd
 from mpi4py import MPI
 import theano
 import theano.tensor as T
 from theano import function, config, shared, sandbox
 import os
-
+import keras_gradient as kg
 import time
 
 os.environ["THEANO_FLAGS"] = "device=cpu,openmp=TRUE,floatX=float32"
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 size = comm.Get_size()
-input_col = 42
-num_neutron_1 = 24
-num_neutron_2 = 12
-output_col=1 
-
+DIETAG = 666
+n_iteration = 100
+EPSILON = 10**-4
+learning_rate = 0.1  ## learning rate
+l2_rate = 0.01 # regularization l2 rate
+eps = 10**-8 # error term in Adagrad
 
 # architecture
 n_nodes = [42,24,12,1]
@@ -29,22 +30,14 @@ for i in range(len(n_nodes)-1):
 for i in range(len(n_nodes)-1):   
     b = np.zeros(n_nodes[i+1])  # 1-darray 
     param_list += [b]
-
 # master: cache has the same dimensions as parameters and gradients
 cache_list = [np.zeros_like(w) for w in param_list]
 
-
-
-
-DIETAG = 666
-n_iteration = 10
-EPSILON = 10**-5
-eta = 0.1  ## learning rate
-l2_rate = 0.01 # regularization l2 rate
-
-def gradient(trainX,trainY,w1,w2,w3,b1,b2,b3):
-    [nrow, ncol] = trainX.shape 
-    
+def gradient(X,Y,w1,w2,w3,b1,b2,b3,batchsize):
+    [nrow, ncol] = X.shape 
+    index = np.random.choice(range(nrow),size=batchsize,replace=False)
+    trainX = X[index,:]
+    trainY = np.reshape(Y[index],[batchsize,1])
     x = T.dmatrix('x')
     y = T.dmatrix('y')
     w01 = theano.shared(value = w1, name='w01',borrow=True)
@@ -89,22 +82,23 @@ def lossfunc(X,Y,w1,w2,w3,b1,b2,b3):
     loss = np.asscalar(f(X,Y)[0])
     return loss
 
-if rank == 0:
-    data = pd.read_csv("price_inputs_GS2016_train.csv",header=-1)
-    [nrow, ncol] = data.shape
-    data=data.values.flatten()
-    chunksize = int(np.ceil(nrow/size))
-    len0=(nrow-(size-1)*chunksize)*ncol
-    len1=chunksize*ncol
 
+if rank == 0:
+    data_train = np.genfromtxt('second_level_inputs_GS2016_train.csv',delimiter=',',skip_header=1)[:,1:]
+    data_test = np.genfromtxt('second_level_inputs_GS2016_test.csv',delimiter=',',skip_header=1)[:,1:]
+    [nrow, ncol] = data_train.shape
+    data_train=data_train.flatten()
+    chunksize = int(np.ceil(0.8*nrow/(size-1)))
+    len1=chunksize*ncol
+    len0=nrow*ncol-len1*(size-1)
+    data_train=np.hstack((data_train[(size-1)*len1:],data_train[:(size-1)*len1]))
 else:
-    data = None
+    data_train = None
     nrow = None
     ncol = None
     len0 = None
     len1 = None
     chunksize = None
-    
 
 nrow = comm.bcast(nrow, root=0)
 ncol = comm.bcast(ncol, root=0)
@@ -113,110 +107,84 @@ len1 = comm.bcast(len1, root=0)
 chunksize = comm.bcast(chunksize, root=0)
 comm.Barrier()
 
-
 if rank == 0 :
     subdata = np.empty(len0)
 else:
     subdata = np.empty(len1)
 
-tuple_len=tuple([len0]+[len1]*(size-1))
-tuple_loc=tuple([0] + range(len0, nrow, len1))
-
-
-comm.Scatterv([data,(len0,len1,len1),(0,len0,len0+len1),MPI.DOUBLE],subdata,root=0)
-#comm.Scatterv([data,(len0,len1),(0,len0),MPI.DOUBLE],subdata,root=0)
+if size==3:
+    comm.Scatterv([data_train,(len0,len1,len1),(0,len0,len0+len1),MPI.DOUBLE],subdata,root=0)
+if size==4:
+    comm.Scatterv([data_train,(len0,len1,len1,len1),(0,len0,len0+len1,len0+2*len1),MPI.DOUBLE],subdata,root=0)
+if size==5:
+    comm.Scatterv([data_train,(len0,len1,len1,len1,len1),(0,len0,len0+len1,len0+2*len1,len0+3*len1),MPI.DOUBLE],subdata,root=0)
+if size==6:
+    comm.Scatterv([data_train,(len0,len1,len1,len1,len1,len1),(0,len0,len0+len1,len0+2*len1,len0+3*len1,len0+4*len1),MPI.DOUBLE],subdata,root=0)
+if size==7:
+    comm.Scatterv([data_train,(len0,len1,len1,len1,len1,len1,len1),(0,len0,len0+len1,len0+2*len1,len0+3*len1,len0+4*len1,len0+5*len1),MPI.DOUBLE],subdata,root=0)    
+if size==8:
+    comm.Scatterv([data_train,(len0,len1,len1,len1,len1,len1,len1,len1),(0,len0,len0+len1,len0+2*len1,len0+3*len1,len0+4*len1,len0+5*len1,len0+6*len1),MPI.DOUBLE],subdata,root=0)
 comm.Barrier()
 
 if rank == 0 :
-    data=data.reshape(nrow,ncol)
     subdata = subdata.reshape(int(len0/ncol),ncol)
 else:
     subdata = subdata.reshape(int(len1/ncol),ncol)
 
 comm.Barrier()
 
-# w1 = np.ones([input_col,num_neutron_1])
-# w2 = np.ones([num_neutron_1,num_neutron_2])
-# w3 = np.ones([num_neutron_2,output_col])
-# b1 = np.zeros(num_neutron_1)
-# b2 = np.zeros(num_neutron_2)
-# b3 = np.zeros(output_col)
-# w1_temp = np.ones([input_col,num_neutron_1])
-# w2_temp = np.ones([num_neutron_1,num_neutron_2])
-# w3_temp = np.ones([num_neutron_2,output_col])
-# b1_temp = np.zeros(num_neutron_1)
-# b2_temp = np.zeros(num_neutron_2)
-# b3_temp = np.zeros(output_col)
-# dw1 = np.empty([input_col,num_neutron_1])
-# dw2 = np.empty([num_neutron_1,num_neutron_2])
-# dw3 = np.empty([num_neutron_2,output_col])
-# db1 = np.empty(num_neutron_1)
-# db2 = np.empty(num_neutron_2)
-# db3 = np.empty(output_col)
-
 
 # master server: receive gradients, store m and v list, update and return parameters 
 if rank == 0:
     iteration = 0
     l_old = -1 #loss
+    mpistart_time = time.time()
+    print "iteration,loss,worker"
     while True:          
-
-        l_new = lossfunc(data[:,1:],data[:,0:1],*param_list)##############
-        print "Iteration {} with loss {}".format(iteration,l_new)
+        loss_time = time.time()
+        l_new = lossfunc(subdata[:,1:],subdata[:,0:1],*param_list)
         epsilon = abs(l_new - l_old)
         l_old = l_new
         if iteration == n_iteration or epsilon < EPSILON:
             break
         status = MPI.Status()
-        print "dw from worker {}".format(status.Get_source())
-
         grad_list = comm.recv(source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG,status=status)
-        
         start = time.time()
         # each grad and cache have the same dimensions as param 
-        for jj, grad,cache in enumerate(grad_list,cache_list):
-            
+        for jj, grad in enumerate(grad_list):
+            cache = cache_list[jj]
             # calculate decay as a scalar 
             if jj < len(grad_list)/2 :  # when it is w 
                 decay =  1 - l2_rate * learning_rate/ int(len1/ncol)
             else: # when it is b
                 decay = 1.
             param_list[jj] *= decay
-
             # cache and grad must have the same dimensions 
             cache += grad**2 
             param_list[jj] -= learning_rate * grad / (np.sqrt(cache) + eps)
-           
-        print 'master ',rank,'updates parameters takes',time.time()-start
         
-        comm.send(param,dest=status.Get_source(),tag=0)
-        
+        comm.send(param_list,dest=status.Get_source(),tag=0)
         iteration += 1
+        print "{},{},{}".format(iteration,l_new,status.Get_source())
 
     #send message to let workers stop
     for r in range(1, size):
         comm.send([0]*6, dest=r, tag=DIETAG)
 
-
 # workers: receive parameters, return gradients
 else:
     while True:
-        #start = time.time()
-        # we can tune these such that roughly num_batches * batchsize ~= subdata.shape[0]
+        start = time.time()
         num_batches = 20
-        batchsize = subdata.shape[0] / num_batches
+        batchsize = 1024
         new_grad_list = [np.zeros_like(w) for w in param_list]     
-
         # for each batch, sum over all the gradients of batches and then 
         for ii in range(num_batches):
-            batch = subdata[ ii * batchsize : min((ii + 1) * batchsize ,subdata.shape[0]), ]
-            grad_list = gradient(batch[:,1:],batch[:,0:1], *param_list) ## batchsize=50, penalty parameter=1
+            grad_list = gradient(subdata[:,1:],subdata[:,0:1], *param_list, batchsize=batchsize) ## batchsize=1024
             for iii,g in enumerate(grad_list):
                 new_grad_list[iii] += g
-
         # scale down the gradient if they are not rescaled in gradient function
         new_grad_list = [g/num_batches for g in new_grad_list]
-        #print 'worker ',rank,'computes gradient and takes time:',time.time()-start 
         comm.send(new_grad_list, dest=0, tag=1)
         status = MPI.Status()
         param_list = comm.recv(source=0,tag=MPI.ANY_TAG,status=status)
