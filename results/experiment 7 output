@@ -1,7 +1,9 @@
 experiment 7 
 # with second level inputs data N~100,000, same setting as before 
 
-# convergence criterion, if max epoch = 2000 reached or validation_err[-1] > validation_err[-10]:
+# hessain free 
+Conjugate Gradient maximum iteration = 2,
+# convergence criterion, if max epoch = 2000 reached or validation_err[-1] > validation_err[-10]: therefore unknown number of epochs, but we can argue that to reach the similar convergence threshold, each models take the following seconds
 
 # Hessian free GPU, running time in seconds 
 GPU found, using Tesla K20Xm (3, 5)
@@ -106,3 +108,250 @@ GPU found, using Tesla K20Xm (3, 5)
 33.5226078033
 31.4912500381
 
+
+# hessian free GPU ( using Tesla K20Xm (3, 5) )
+# fixing 2000 epochs 
+# Evaluating hessian free
+running time per trial 5669.19178391 (seconds)
+accuracy
+mean 0.529322816625
+conf interval [0.529322816625,0.529322816625]
+hit_ratio
+mean 0.35765080922
+conf interval [0.35765080922,0.35765080922]
+mean_squared_error
+mean 19.444847931
+conf interval [19.444847931,19.444847931]
+mean_absolute_error
+mean 2.83071260629
+conf interval [2.83071260629,2.83071260629]
+
+
+
+
+# pso results (sequential)
+
+# total running time: 07:21:34 (HH:MM:SS)  - if you substract the initialization of each particle by keras (warm start), 1000 epochs take   07:21:34 - 100 particles * ~10 seconds/particle
+
+# experimental settings
+
+# second level inputs data N~100,000;
+
+# pso params: reached 1000 epoch (no other convergence criterion) with 100 particles; inertia 1 c1 1.49 c2 3.49
+Begin particle swarm optimization using Python demo
+
+Goal is to solve MSE's function in 1345 variables
+Setting num_particles = 100
+Setting max_epochs    = 1000
+
+Starting PSO algorithm
+
+Using warm start, fit a keras model by adam on the training set as the initial weight for all particles
+initializing a keras model 0 takes 14.0220780373 seconds
+initializing a keras model 1 takes 14.1278030872 seconds
+initializing a keras model 2 takes 10.5772738457 seconds
+initializing a keras model 3 takes 6.41311788559 seconds
+initializing a keras model 4 takes 8.23598814011 seconds
+initializing a keras model 5 takes 13.5030469894 seconds
+initializing a keras model 6 takes 7.09486198425 seconds
+initializing a keras model 7 takes 14.1539740562 seconds
+initializing a keras model 8 takes 8.00768589973 seconds
+initializing a keras model 9 takes 6.87009096146 seconds
+initializing a keras model 10 takes 8.43441796303 seconds
+initializing a keras model 11 takes 9.37192797661 seconds
+initializing a keras model 12 takes 13.9341979027 seconds
+initializing a keras model 13 takes 9.08760595322 seconds
+initializing a keras model 14 takes 14.1739599705 seconds
+initializing a keras model 15 takes 6.39631915092 seconds
+initializing a keras model 16 takes 6.63786196709 seconds
+initializing a keras model 17 takes 5.49498510361 seconds
+initializing a keras model 18 takes 11.8405508995 seconds
+initializing a keras model 19 takes 14.0884740353 seconds
+initializing a keras model 20 takes 8.70658397675 seconds
+initializing a keras model 21 takes 9.41861391068 seconds
+initializing a keras model 22 takes 13.5107018948 seconds
+initializing a keras model 23 takes 10.117980957 seconds
+initializing a keras model 24 takes 8.7222058773 seconds
+initializing a keras model 25 takes 14.1513249874 seconds
+initializing a keras model 26 takes 5.3320248127 seconds
+initializing a keras model 27 takes 14.1130430698 seconds
+initializing a keras model 28 takes 7.56683397293 seconds
+initializing a keras model 29 takes 5.29018115997 seconds
+initializing a keras model 30 takes 7.76163983345 seconds
+initializing a keras model 31 takes 10.0429530144 seconds
+initializing a keras model 32 takes 7.07107806206 seconds
+initializing a keras model 33 takes 8.94946098328 seconds
+initializing a keras model 34 takes 11.8290019035 seconds
+initializing a keras model 35 takes 14.0833919048 seconds
+initializing a keras model 36 takes 7.82185101509 seconds
+initializing a keras model 37 takes 14.1842801571 seconds
+initializing a keras model 38 takes 10.4547719955 seconds
+initializing a keras model 39 takes 8.31323194504 seconds
+initializing a keras model 40 takes 9.98345899582 seconds
+initializing a keras model 41 takes 14.2267329693 seconds
+initializing a keras model 42 takes 7.94089794159 seconds
+initializing a keras model 43 takes 14.1677889824 seconds
+initializing a keras model 44 takes 6.19471001625 seconds
+initializing a keras model 45 takes 14.0387969017 seconds
+initializing a keras model 46 takes 5.74463820457 seconds
+initializing a keras model 47 takes 14.1505570412 seconds
+initializing a keras model 48 takes 14.2341649532 seconds
+initializing a keras model 49 takes 14.0731811523 seconds
+initializing a keras model 50 takes 13.2468750477 seconds
+initializing a keras model 51 takes 6.60200786591 seconds
+initializing a keras model 52 takes 11.1638548374 seconds
+initializing a keras model 53 takes 14.1579020023 seconds
+initializing a keras model 54 takes 10.2122120857 seconds
+initializing a keras model 55 takes 13.0525169373 seconds
+initializing a keras model 56 takes 11.1941549778 seconds
+initializing a keras model 57 takes 10.6891200542 seconds
+initializing a keras model 58 takes 13.8921558857 seconds
+initializing a keras model 59 takes 6.40910601616 seconds
+initializing a keras model 60 takes 9.64678406715 seconds
+initializing a keras model 61 takes 7.63455796242 seconds
+initializing a keras model 62 takes 14.1229960918 seconds
+initializing a keras model 63 takes 11.9079608917 seconds
+initializing a keras model 64 takes 9.8487200737 seconds
+initializing a keras model 65 takes 6.9050347805 seconds
+initializing a keras model 66 takes 8.2391679287 seconds
+initializing a keras model 67 takes 9.20161986351 seconds
+initializing a keras model 68 takes 5.9881298542 seconds
+initializing a keras model 69 takes 11.1886980534 seconds
+initializing a keras model 70 takes 12.1790421009 seconds
+initializing a keras model 71 takes 7.31859588623 seconds
+initializing a keras model 72 takes 4.60041093826 seconds
+initializing a keras model 73 takes 8.86770510674 seconds
+initializing a keras model 74 takes 8.85526895523 seconds
+initializing a keras model 75 takes 14.1319999695 seconds
+initializing a keras model 76 takes 14.0346689224 seconds
+initializing a keras model 77 takes 11.5623459816 seconds
+initializing a keras model 78 takes 8.21314501762 seconds
+initializing a keras model 79 takes 13.3874151707 seconds
+initializing a keras model 80 takes 6.41497302055 seconds
+initializing a keras model 81 takes 10.0383090973 seconds
+initializing a keras model 82 takes 12.0847969055 seconds
+initializing a keras model 83 takes 5.74172782898 seconds
+initializing a keras model 84 takes 11.3947300911 seconds
+initializing a keras model 85 takes 8.4599750042 seconds
+initializing a keras model 86 takes 13.9763021469 seconds
+initializing a keras model 87 takes 8.20818305016 seconds
+initializing a keras model 88 takes 10.0427360535 seconds
+initializing a keras model 89 takes 13.2746181488 seconds
+initializing a keras model 90 takes 14.1117899418 seconds
+initializing a keras model 91 takes 8.99408793449 seconds
+initializing a keras model 92 takes 11.2452788353 seconds
+initializing a keras model 93 takes 11.8051941395 seconds
+initializing a keras model 94 takes 11.3761610985 seconds
+initializing a keras model 95 takes 12.7074129581 seconds
+initializing a keras model 96 takes 8.02319693565 seconds
+initializing a keras model 97 takes 14.1513469219 seconds
+initializing a keras model 98 takes 9.39801812172 seconds
+initializing a keras model 99 takes 9.4735929966 seconds
+
+# the following best error shown each epoch is training
+Epoch = 10 best error = 1.321
+Epoch = 20 best error = 1.238
+Epoch = 30 best error = 1.233
+Epoch = 40 best error = 1.232
+Epoch = 50 best error = 1.231
+Epoch = 60 best error = 1.230
+Epoch = 70 best error = 1.229
+Epoch = 80 best error = 1.227
+Epoch = 90 best error = 1.227
+Epoch = 100 best error = 1.227
+Epoch = 110 best error = 1.227
+Epoch = 120 best error = 1.227
+Epoch = 130 best error = 1.227
+Epoch = 140 best error = 1.227
+Epoch = 150 best error = 1.227
+Epoch = 160 best error = 1.227
+Epoch = 170 best error = 1.227
+Epoch = 180 best error = 1.227
+Epoch = 190 best error = 1.227
+Epoch = 200 best error = 1.227
+Epoch = 210 best error = 1.227
+Epoch = 220 best error = 1.227
+Epoch = 230 best error = 1.227
+Epoch = 240 best error = 1.227
+Epoch = 250 best error = 1.227
+Epoch = 260 best error = 1.227
+Epoch = 270 best error = 1.227
+Epoch = 280 best error = 1.227
+Epoch = 290 best error = 1.227
+Epoch = 300 best error = 1.227
+Epoch = 310 best error = 1.227
+Epoch = 320 best error = 1.227
+Epoch = 330 best error = 1.227
+Epoch = 340 best error = 1.227
+Epoch = 350 best error = 1.227
+Epoch = 360 best error = 1.227
+Epoch = 370 best error = 1.227
+Epoch = 380 best error = 1.227
+Epoch = 390 best error = 1.227
+Epoch = 400 best error = 1.227
+Epoch = 410 best error = 1.227
+Epoch = 420 best error = 1.227
+Epoch = 430 best error = 1.227
+Epoch = 440 best error = 1.227
+Epoch = 450 best error = 1.227
+Epoch = 460 best error = 1.227
+Epoch = 470 best error = 1.227
+Epoch = 480 best error = 1.227
+Epoch = 490 best error = 1.227
+Epoch = 500 best error = 1.226
+Epoch = 510 best error = 1.226
+Epoch = 520 best error = 1.226
+Epoch = 530 best error = 1.226
+Epoch = 540 best error = 1.226
+Epoch = 550 best error = 1.226
+Epoch = 560 best error = 1.226
+Epoch = 570 best error = 1.226
+Epoch = 580 best error = 1.226
+Epoch = 590 best error = 1.226
+Epoch = 600 best error = 1.226
+Epoch = 610 best error = 1.226
+Epoch = 620 best error = 1.226
+Epoch = 630 best error = 1.226
+Epoch = 640 best error = 1.226
+Epoch = 650 best error = 1.226
+Epoch = 660 best error = 1.226
+Epoch = 670 best error = 1.226
+Epoch = 680 best error = 1.226
+Epoch = 690 best error = 1.226
+Epoch = 700 best error = 1.226
+Epoch = 710 best error = 1.226
+Epoch = 720 best error = 1.226
+Epoch = 730 best error = 1.226
+Epoch = 740 best error = 1.226
+Epoch = 750 best error = 1.226
+Epoch = 760 best error = 1.226
+Epoch = 770 best error = 1.226
+Epoch = 780 best error = 1.226
+Epoch = 790 best error = 1.226
+Epoch = 800 best error = 1.226
+Epoch = 810 best error = 1.226
+Epoch = 820 best error = 1.226
+Epoch = 830 best error = 1.226
+Epoch = 840 best error = 1.226
+Epoch = 850 best error = 1.226
+Epoch = 860 best error = 1.226
+Epoch = 870 best error = 1.226
+Epoch = 880 best error = 1.226
+Epoch = 890 best error = 1.226
+Epoch = 900 best error = 1.226
+Epoch = 910 best error = 1.226
+Epoch = 920 best error = 1.226
+Epoch = 930 best error = 1.226
+Epoch = 940 best error = 1.226
+Epoch = 950 best error = 1.226
+Epoch = 960 best error = 1.226
+Epoch = 970 best error = 1.226
+Epoch = 980 best error = 1.226
+Epoch = 990 best error = 1.226
+
+PSO completed
+
+
+Best solution found:
+Evaluating on the validation set:
+Validation Error of best solution = 0.477089

@@ -24,7 +24,11 @@ import multiprocessing as mp
 
 os.environ["THEANO_FLAGS"] = "device=cpu,openmp=1,floatX=float32"
 
+''' 
+    MAKE SURE YOU RUN THIS SECTION ONLY ONCE; RUNNING IT MORE THAN ONCE WILL ADD ON MORE LAYERS
+    YOU NEED TO RESTART THE IPYTHON KERNEL IF YOU WANT TO REFRESH THE MODEL
 
+'''
 ##################################################################################################################
 ##################################################################################################################
 
@@ -191,8 +195,8 @@ def Solve(max_epochs, n, dim, minx, maxx,inertia, c1,c2,warm_start = 1):
         
         val_loss.append( error(best_swarm_pos, *args))
         
-        if len(val_loss)>10 and val_loss[-1] > val_loss[-10]:
-            break
+#         if len(val_loss)>10 and val_loss[-1] > val_loss[-10]:
+#             break
 
         for i in range(n): # process each particle
 
@@ -234,19 +238,19 @@ def Solve(max_epochs, n, dim, minx, maxx,inertia, c1,c2,warm_start = 1):
         
         # for-each particle
         epoch += 1
-    plt.plot(val_loss)
+    
     # end while
     return best_swarm_pos,best_swarm_err
 # end Solve
 
 ##########################################################################################
 
-####################################### EXPERIMENT ###########################################
-
-
+# data = pd.read_csv("test_data.csv",header=-1).values
+# X=data[:,0:42]
+# Y=data[:,42:43]
 
 # read data 
-data = np.genfromtxt('price_inputs_GS2016.csv',delimiter=',',skip_header=1)
+data = np.genfromtxt('second_level_inputs_GS2016.csv',delimiter=',',skip_header=1)
 X,Y = data[:,2:],data[:,1:2] # X means features, Y means target 
 
 
@@ -261,7 +265,7 @@ n_nodes= [X.shape[1],24,12,1]
 batch_size = 1024
 
 
-#########################################################################################################
+
 # define parameters for PSO
 model = keras_NN(n_nodes,'adagrad') # for warm start
 dim = np.sum( n_nodes[i]*n_nodes[i+1] + n_nodes[i+1] for i in range(len(n_nodes)-1)) 
@@ -282,7 +286,7 @@ print "\nStarting PSO algorithm\n"
 
 start = time.time()
 best_position,best_error = Solve(max_epochs, num_particles,
- dim, -1.0, 1.0,inertia, c1,c2,warm_start=1)
+ dim, -1.0, 1.0,inertia, c1,c2,warm_start=0)
 t = time.time()
 print"\nPSO completed in {} seconds \n".format(t-start)
 print"\nBest solution found:"
