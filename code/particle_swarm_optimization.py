@@ -24,16 +24,12 @@ import multiprocessing as mp
 
 os.environ["THEANO_FLAGS"] = "device=cpu,openmp=1,floatX=float32"
 
-''' 
-    MAKE SURE YOU RUN THIS SECTION ONLY ONCE; RUNNING IT MORE THAN ONCE WILL ADD ON MORE LAYERS
-    YOU NEED TO RESTART THE IPYTHON KERNEL IF YOU WANT TO REFRESH THE MODEL
 
-'''
 ##################################################################################################################
 ##################################################################################################################
 
 
-def keras_NN(n_nodes):
+def keras_NN(n_nodes,optimizer):
     '''This function initializes and return a new neural network with regularization techniques
        
        the returned object contains these methods:
@@ -74,7 +70,7 @@ def keras_NN(n_nodes):
     model = Model(inputs=inputs, outputs=predictions)
 
     # Compile model with LOSS FUNCTION and ADAM OPTIMIZER
-    model.compile(loss='mean_squared_error', optimizer='adam')
+    model.compile(loss='mean_squared_error', optimizer=optimizer)
     return model
 
 
@@ -143,8 +139,17 @@ class Particle:
             self.position = encode(model.get_weights())
             
             print 'initializing a keras model %s takes'%seed,time.time()-start,'seconds'
-       
-        
+            # personal error
+            self.error = hist.history['loss'][-1] # curr error
+            self.best_part_pos = self.position[:]
+            self.best_part_err = [self.error] # best error
+        else:
+            
+            # personal error
+            self.error = [np.inf] # curr error
+            self.best_part_pos = self.position[:]
+            self.best_part_err = [self.error] # best error
+
         for i in range(dim):
             if model is None:
                 self.position[i] = ((maxx - minx) *
@@ -152,22 +157,17 @@ class Particle:
             self.velocity[i] = ((maxx - minx) *
                     self.rnd.random() + minx)
 
-        # personal error
-        self.error = hist.history['loss'][-1] # curr error
-        self.best_part_pos = self.position[:]
-        self.best_part_err = [self.error] # best error
-
 def Solve(max_epochs, n, dim, minx, maxx,inertia, c1,c2,warm_start = 1):
     rnd = random.Random(0)
     
     # create n random particles
     if warm_start==1:
-        print 'Using warm start, fit a keras model by adam on the training set as the initial weight for all particles'
-        swarm = [Particle(dim, minx, maxx, i,keras_NN(n_nodes)) for i in range(n)] 
+        print 'Using warm start, fit a keras model by adagrad on the training set as the initial weight for all particles'
+        swarm = [Particle(dim, minx, maxx, i,keras_NN(n_nodes,'adagrad')) for i in range(n)] 
     else:
         swarm = [Particle(dim, minx, maxx, i) for i in range(n)] 
 
-    best_swarm_pos = [0.0 for i in range(dim)] # not necess.
+    best_swarm_pos = np.zeros(dim) # not necess.
     best_swarm_err = [np.inf] # swarm best
     for i in range(n): # check each particle
         
@@ -176,22 +176,32 @@ def Solve(max_epochs, n, dim, minx, maxx,inertia, c1,c2,warm_start = 1):
             best_swarm_pos = swarm[i].position[:]
 
     epoch = 0
-   
-
-
-    while epoch < max_epochs:
     
+    val_loss = []
+   
+    while epoch < max_epochs:
+        
+        # evaluate validation loss every 10 epochs
         if epoch % 10 == 0 and epoch > 1:
             print "Epoch = " + str(epoch) +\
-                 " best error = %.3f" % best_swarm_err[-1]
-      
+                 " best training error = %.3f" % best_swarm_err[-1] + \
+                " Validation error = %.3f" % val_loss[-1]
+        
+        args = (model,X_val,Y_val)
+        
+        val_loss.append( error(best_swarm_pos, *args))
+        
+        if len(val_loss)>10 and val_loss[-1] > val_loss[-10]:
+            break
+
         for i in range(n): # process each particle
 
             # compute new velocity of curr particle
             for k in range(dim): 
-                r1 = rnd.random()    # randomizations
-                r2 = rnd.random()
-                
+#                 r1 = rnd.random()    # randomizations
+#                 r2 = rnd.random()
+                r1 = np.random.random()
+                r2 = np.random.random()
                 swarm[i].velocity[k] = ( (w * swarm[i].velocity[k]) +
                       (c1 * r1 * (swarm[i].best_part_pos[k] - 
                                   swarm[i].position[k])) +  
@@ -220,18 +230,20 @@ def Solve(max_epochs, n, dim, minx, maxx,inertia, c1,c2,warm_start = 1):
             if swarm[i].error < best_swarm_err[-1]:
                 best_swarm_err.append(swarm[i].error)
                 best_swarm_pos = swarm[i].position[:]
-
+        
+        
         # for-each particle
         epoch += 1
+    plt.plot(val_loss)
     # end while
     return best_swarm_pos,best_swarm_err
 # end Solve
 
 ##########################################################################################
 
-# data = pd.read_csv("test_data.csv",header=-1).values
-# X=data[:,0:42]
-# Y=data[:,42:43]
+####################################### EXPERIMENT ###########################################
+
+
 
 # read data 
 data = np.genfromtxt('price_inputs_GS2016.csv',delimiter=',',skip_header=1)
@@ -249,11 +261,13 @@ n_nodes= [X.shape[1],24,12,1]
 batch_size = 1024
 
 
-
+#########################################################################################################
 # define parameters for PSO
-model = keras_NN(n_nodes)
-dim = np.sum([np.prod(w.shape) for w in model.get_weights()])
-num_particles = 10
+model = keras_NN(n_nodes,'adagrad') # for warm start
+dim = np.sum( n_nodes[i]*n_nodes[i+1] + n_nodes[i+1] for i in range(len(n_nodes)-1)) 
+
+
+num_particles = 5
 max_epochs = 100
 inertia = 1.   # inertia
 c1 = 1.49445 # cognitive (particle)
@@ -265,15 +279,17 @@ print "Setting num_particles = " + str(num_particles)
 print "Setting max_epochs    = " + str(max_epochs)
 print "\nStarting PSO algorithm\n"
 
-best_position,best_error = Solve(max_epochs, num_particles,
- dim, -1.0, 1.0,inertia, c1,c2)
 
-print"\nPSO completed\n"
+start = time.time()
+best_position,best_error = Solve(max_epochs, num_particles,
+ dim, -1.0, 1.0,inertia, c1,c2,warm_start=1)
+t = time.time()
+print"\nPSO completed in {} seconds \n".format(t-start)
 print"\nBest solution found:"
 model.set_weights(decode(best_position))
 
 
-print 'Evaluating on the validation set:'
-args = (model,X_val,Y_val)
+print 'Evaluating on the test set:'
+args = (model,X_test,Y_test)
 err = error(best_position, *args)
-print"Error of best solution = %.6f" % err
+print"Test error of best solution = %.6f" % err
