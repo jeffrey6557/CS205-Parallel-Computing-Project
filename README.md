@@ -99,7 +99,7 @@ Figure 4 and 5 compares the running time till convergence and average running ti
 
 <center><img src="images/plot2_timeWithFixedIterations.png" alt="Time with fixed iterations" align="middle" style="width: 400px;"/></center>
 
-+*Figure 5: Time until convergence per iteration for all models/algorithms. Models with description 'big batch' were trained using a batch size of 4096 observations.*
+*Figure 5: Time until convergence per iteration for all models/algorithms. Models with description 'big batch' were trained using a batch size of 4096 observations.*
 
 Figure 6 shows the strong scaling. We find in both graphs, the batch size does not affect the runtime too much. This suggests in each model replica, matrix computations are well handled, and can is not a bottleneck of our algorithm. Comparing the curves for different chain lengths, we see that chain length = 1 (instant updating scheme) leads to longer average per iteration time, but shorter overall convergence time. These observations support the specification in Optimization Methods section. We suppose that if the communication cost is high (internet speed, data chunk sizes, communication barriers, etc.), the cumulaive updating scheme could outperform the instant version.
 
