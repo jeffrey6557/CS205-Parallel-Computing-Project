@@ -331,6 +331,8 @@ if __name__=='__main__':
     hit_ratio = lambda x,y: np.mean( ((x[1:] - x[:-1]) * (y[1:]-y[:-1]))>0 )
     eval_f = [accuracy,hit_ratio,mean_squared_error,mean_absolute_error]
     labels = 'accuracy,hit_ratio,mean_squared_error,mean_absolute_error'.split(',')
-    print labels
-    print [ f(pred,truth) for j,f in enumerate(eval_f) ]
+    scores = [ f(pred,truth) for j,f in enumerate(eval_f) ]
+    for l, v in zip(labels,scores):
+        print l, v
+        
 
