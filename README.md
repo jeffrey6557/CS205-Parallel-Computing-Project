@@ -67,11 +67,16 @@ Secondly, each model replica aimed to compute ∆𝑤 by averaging the mini-batc
 
 - <span style="color:red">**Particle Swarm Optimization (PSO)**</span>: computational method that solves a problem by having a population of candidate solutions, or particles, and moving these around in the search-space according to simple mathematical formulae over the particle's position and velocity. Each particle's movement is influenced by its local best known position, but is also guided toward the best known positions in the search-space, which are updated as better positions are found by other particles. This is expected to move the swarm toward the best solutions.
 
-AdaGrad is implemented using [Keras](https://keras.io), and Hessian-free is applied using [hessianfree](http://pythonhosted.org/hessianfree/index.html).
+AdaGrad is implemented using [Keras](https://keras.io), and Hessian-free is applied using [hessianfree](http://pythonhosted.org/hessianfree/index.html), parallel Particle Swarm Optimization is implemented mulitprocessing module in python and adapted from [here] (https://jamesmccaffrey.wordpress.com/2015/06/09/particle-swarm-optimization-using-python/). 
 
-We test the performance of all models on predicting minute-level stock returns of Goldman Sachs in 2016. With an input size of 100,000 observations, we train a model with 75% of the stock prices and test it on the rest of the data. The batch size is 1,024 or 4096 per model replica, a neural network has 2 hidden layers with 24, 12 neurons, respectively. The maximum number of epochs (loosely defined as the number of minibatch update) was set to <span style="color:red">**2000, and the initial learning rate is 0.01**</span>. The activation function is Relu except on the last layer, the output, where the activation function is linear. 
+#### Validation and Testing 
+
+Because of the time series nature of the high-frequency data, we employ a walk-forward method that is suited for back-testing financial time series model, instead of k-fold cross-validation, to avoid forward-looking bias. For each rolling window, we determine if for each  epoch, our iterative machine learning algorithms (Adagrad, Hessian Free, Particle Swarm Optimization) should stop the training process based on the loss calculated on the "validation timestep". If we do terminate the algorithm, we then evaluate the performance of the final model in the "testing timestep". For simplicity and fair comparison, we used window size = 1 for all the algorithms, because for some algorithm like sequential Particle Swarm Optimization, running one window frame can take more than 7 hours on Odyssey. 
+
+We test the performance of all models on predicting second-level stock returns of Goldman Sachs in 2016. With an input size of 100,000 observations, we train a model with 75% of the stock prices and test it on the rest of the data. The batch size is 1,024 or 4096 per model replica, a neural network has 2 hidden layers with 24, 12 neurons, respectively. The maximum number of epochs (loosely defined as the number of minibatch update) was set to <span style="color:red">**2000, and the initial learning rate is 0.01**</span>. The activation function is Relu except on the last layer, the output, where the activation function is linear. 
 
 Within the training data, we use 80% of this dataset to train in the model replicas. After ∆𝑤 is sent to the master node, 𝑤 is updated and used to test on the rest of the training data (other 20%). As predictions get closer to true outcomes (absolute difference of loss of (i+1) iteration and i iteration is less than 10e-4), the program is stopped and we deduced convergence. If predictions were distant from true values, training continued.
+
 
 #### Outline of Experiments
 
@@ -82,6 +87,8 @@ We present the layout of our model combinations and their analysis. First, we ar
 <img src="images/model_table.png" alt="Model table" style="width: 200px;"/>
 
 *Table 1: We run Hessian-free and AdaGrad in GPU. Not included in this table, we also run AdaGrad with 3, 4, 5, 6, 7 and 8 cores at 4 cores each (using MPI), but we force an earlier stop (maximum 2000 iterations).*
+
+Also, we run 
 
 ## Results
 
@@ -127,43 +134,11 @@ We test the performance of a single model replica using each of the model replic
 We observe that loss function converges rather quickly and has a smooth trajectory due to the relatively large size of our batches. In terms of speedups, there is a performance peak at the batch size of 128. 
 -->
 
-# Validation and Testing Methods
-
-Because of the time series nature of the high-frequency data, we employ a walk-forward method that is suited for back-testing financial time series model, instead of k-fold cross-validation, to avoid forward-looking bias. For each rolling window, we determine if for each  epoch, our iterative machine learning algorithms (Adagrad, Hessian Free, Particle Swarm Optimization) should stop the training process based on the loss calculated on the "validation timestep". If we do terminate the algorithm, we then evaluate the performance of the final model in the "testing timestep". For simplicity and fair comparison, we used window size = 1 for all the algorithms, because for some algorithm like sequential Particle Swarm Optimization, running one window frame can take more than 7 hours on Odyssey. 
-
-![backtest](images/backtest.png)
-*Figure 6: Walk-forward method for time series prediction.*
-
-The walk-forward method is implemented as follows: 
-
-```python
-# Input: define data[0 : T-1], training_size, validation_size, test_size, window_size
-# Output: predicted values from t = T-training_size-validation_size : T-1 
-for t in range(training_size + validation_size, T): 
-    if t % test_size != 1:
-        # predict on time t using a trained Neural Network;
-    else:
-        training_data = data[t - training_size- validation_size : t - validation_size]
-        validation_data = data[t- validation_size: t]
-        for i in range(N_window):
-            # train the model based on a random starting point and a bootstrapped sample of training_data;
-            # decide if we should terminate the algorithm based on the same validation_data
-        # predicts on time t 
-    # compute performance metrics on time t
-```
-Figure 8: Pseudo-code for backtesting
-
-We search for the optimal network hyperparameters with:
-
-1. Researcher’s guess (simple)
-2. Grid Search (costly, inefficient)
-3. Particle Swarm Optimization (embarassingly parallel, available in Python’s package Optunity/pyswarm)
-
 We evaluate our model with the following metrics:
 
 1. Effectiveness
     
-    + Convergence of our model versus traditional implementation of sequential SGD 
+    + Convergence of our models versus traditional implementation of sequential SGD 
 
 2. Accuracies
   
