@@ -128,6 +128,12 @@ In our experiments, we find there are significant overheads for initializing MPI
 
 ## Software
 
+ADA: https://github.com/jeffrey6557/CS205-Parallel-Computing-Project/tree/master/code/ADA
+
+Hessian-free: https://github.com/jeffrey6557/CS205-Parallel-Computing-Project/tree/master/code/HessianFree
+
+PSO: https://github.com/jeffrey6557/CS205-Parallel-Computing-Project/tree/master/code/PSO
+
 ## References
 [1] Selmi, N., Chaabene, S., & Hachicha, N. (2015). Forecasting returns on a stock market using Artificial Neural Networks and GARCH family models: Evidence of stock market S&P 500. Decision Science Letters,4(2), 203-210. doi:10.5267/j.dsl.2014.12.002
 
