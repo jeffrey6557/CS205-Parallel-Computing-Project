@@ -1,7 +1,7 @@
 
 # CS 205 FINAL PROJECT REPORT
 
-## Parallelizing Neural Network with Improved Performance
+## Parallelizing Neural Network For High-frequency Stock Prediction
 Chang Liu, Greyson Liu, Kamrine Poels, Linglin Huang
 
 ## Background
