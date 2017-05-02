@@ -83,7 +83,7 @@ lines(n, big_n, col = "dark green", lwd = 3)
 legend("topleft", legend = c(1024, 4096), col = c("green", "dark green"), lwd = 3, lty = 1, title = "Batch size")
 dev.off()
 
-## Time per iteration
+# Time per iteration
 ada_n = c(128.506565809/50, 71.5182712078/41, 54.687912941/32, 58.7733278275/43, 68.8883149624/54, 127.44204998/155)
 big_n = c(165.719032049/76, 95.7436389923/72, 90.6643800735/76, 94.1150431633/45, 304.533075809/531, 103.547483921/131)
 
