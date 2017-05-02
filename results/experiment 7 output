@@ -134,11 +134,17 @@ conf interval [2.83071260629,2.83071260629]
 
 # pso params: reached 1000 epoch (no other convergence criterion) with 100 particles; inertia 1 c1 1.49 c2 3.49
 
-# total running time: 07:21:34 (HH:MM:SS)  - if you substract the initialization of each particle by keras (warm start), 1000 epochs take   07:21:34 - 100 particles * ~10 seconds/particle
+# total running time: 07:21:34 (HH:MM:SS)  - 
+
+if you substract the initialization of each particle by keras (warm start), the pso 1000 epochs takes   
+
+07:21:34 - 100 particles * seconds/particle = 7*3600 + 21*60 + 34 - 1034 = 25460 seconds
+average epoch time = 25.4 s
 
 # experimental settings
 
 # second level inputs data N~100,000;
+
 
 
 Begin particle swarm optimization using Python demo

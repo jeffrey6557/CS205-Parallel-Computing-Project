@@ -1,0 +1,34 @@
+
+Goal is to solve MSE's function in 1345 variables
+Setting num_particles = 16
+Setting max_epochs    = 50
+
+Starting PSO algorithm
+
+found a better error
+found a better error
+found a better error
+found a better error
+found a better error
+found a better error
+found a better error
+found a better error
+Epoch = 10 best error = 45.339
+Best pos [ 1.24580339  1.59038713]
+Epoch = 20 best error = 45.339
+Best pos [ 1.24580339  1.59038713]
+Epoch = 30 best error = 45.339
+Best pos [ 1.24580339  1.59038713]
+Epoch = 40 best error = 45.339
+Best pos [ 1.24580339  1.59038713]
+
+Training PSO completed in  38.3810911179 seconds
+
+Best solution found:
+Evaluating on the validation set:
+validation error of best solution = 22.401266
+validation error by keras 22.5078081875
+Test Error 63.8423877807
+Other evaluation metrics
+['accuracy', 'hit_ratio', 'mean_squared_error', 'mean_absolute_error']
+[0.49786455155582671, 0.62693246541903991, 63.735843493376095, 5.9539866683667233]
