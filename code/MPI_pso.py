@@ -6,7 +6,9 @@ import theano.tensor as T
 from theano import function, config, shared, sandbox
 import os
 import particle_swarm_optimization as pso
+import time
 
+time1 = time.time()
 
 os.environ["THEANO_FLAGS"] = "device=cpu,openmp=TRUE,floatX=float32"
 comm = MPI.COMM_WORLD
@@ -35,14 +37,14 @@ def lossfunc(X,Y,w1,w2,w3,b1,b2,b3):
     b23 = theano.shared(value = b3, name='b23',borrow=True)
     L01_temp = T.dot(x, w01) + b01
     L01 = L01_temp*(L01_temp>0)
-    L12_temp = T.dot(L01, w12) + b12 
-    L12 = L12_temp*(L12_temp>0) 
+    L12 = T.dot(L01, w12) + b12 
     L23 = T.dot(L12, w23) + b23
     loss = T.mean((y-L23)**2)
-    f = theano.function(inputs=[x,y], outputs=[loss],name='f')
+    f = theano.function(inputs=[x,y], outputs=[loss,L23],name='f')
     Y = np.reshape(Y,[nrow,1])
-    loss = np.asscalar(f(X,Y)[0])
-    return [loss, L23]
+    l,pred_y = f(X,Y)
+    return [np.asscalar(l), np.array([pred_y[i][0] for i in range(nrow)])]
+
 
 if rank == 0:
     #data = pd.read_csv("test_data.csv",header=-1)
@@ -126,6 +128,7 @@ if rank == 0:
             best_b1 = b1
             best_b2 = b2
             best_b3 = b3
+            loss_best = l_new
         else:
             w1,b1,w2,b2,w3,b3 = best_w1,best_b1,best_w2,best_b2,best_w3,best_b3
         epsilon = abs(l_new - l_old)
@@ -139,9 +142,12 @@ if rank == 0:
     #send message to let workers stop
     for r in range(1, size):
         comm.send([0]*6, dest=r, tag=DIETAG)
-
-    l_new, pred_y = lossfunc(data_test[:,1:],data_test[:,0],w1,w2,w3,b1,b2,b3)
-    print((sum(np.dot((pred_y>0)*1,(data_test[:,0]>0)*1))+sum(np.dot((pred_y<0)*1,(data_test[:,0]<0)*1)))/data_test.shape[0])
+    time2 = time.time()
+    loss, pred_y = lossfunc(data_test[:,1:],data_test[:,0],w1,w2,w3,b1,b2,b3)
+    correct=[(pred_y[i]*data_test[i,0]>0)*1 for i in range(len(pred_y))]
+    accuracy=sum(correct)/float(len(pred_y))
+    print(time2-time1)
+    print(accuracy)
 
 
 else:

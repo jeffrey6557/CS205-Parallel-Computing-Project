@@ -83,7 +83,7 @@ def encode(weights):
         position.extend(w.flatten().tolist())
     return np.array(position)
     
-def decode(position):
+def decode(position, n_nodes):
     '''encode a 1-d array into a list of keras model weights (e.g.w0,b1,w1,b1,....w4,b4)
     usage between encode and decode:
     position = encode(model.get_weights())
@@ -100,8 +100,8 @@ def decode(position):
         weights.append(b)
     return weights
 
-def error(position,*args):
-    weights = decode(position)
+def error(position,n_nodes,*args):
+    weights = decode(position, n_nodes)
     model,X,Y = args
     model.set_weights(weights)
     return model.train_on_batch(X,Y).item()
@@ -111,7 +111,7 @@ def error(position,*args):
 
 
 class Particle:
-    def __init__(self, dim, minx, maxx, seed,model=None, init_position=np.zeros(dim)):
+    def __init__(self, dim, minx, maxx, seed, init_position,model=None):
         '''if model is None, use randomized initial positions;
         otherwise, use a trained keras model weights as warm start
         '''
@@ -128,7 +128,7 @@ class Particle:
             
             self.position = encode(model.get_weights())
             
-            print 'initializing a keras model %s takes'%seed,time.time()-start,'seconds'
+            # print 'initializing a keras model %s takes'%seed,time.time()-start,'seconds'
             # personal error
             self.error = hist.history['loss'][-1] # curr error
             self.best_part_pos = self.position[:]
@@ -147,15 +147,15 @@ class Particle:
             self.velocity[i] = ((maxx - minx) *
                     self.rnd.random() + minx)
 
-def Solve(max_epochs, n, dim, minx, maxx, inertia, c1,c2,warm_start = 1, init_position=np.zeros(dim)):
+def Solve(X_tr,X_val,Y_tr,Y_val,model,n_nodes, max_epochs, n, dim, minx, maxx, inertia, c1,c2,init_position,warm_start = 1):
     rnd = random.Random(0)
     
     # create n random particles
     if warm_start==1:
-        print 'Using warm start, fit a keras model by adagrad on the training set as the initial weight for all particles'
-        swarm = [Particle(dim, minx, maxx, i,keras_NN(n_nodes,'adagrad'), init_position=init_position) for i in range(n)] 
+        # print 'Using warm start, fit a keras model by adagrad on the training set as the initial weight for all particles'
+        swarm = [Particle(dim, minx, maxx, i, init_position, keras_NN(n_nodes,'adagrad')) for i in range(n)] 
     else:
-        swarm = [Particle(dim, minx, maxx, i, init_position=init_position) for i in range(n)] 
+        swarm = [Particle(dim, minx, maxx, i, init_position) for i in range(n)] 
 
     best_swarm_pos = np.zeros(dim) # not necess.
     best_swarm_err = [np.inf] # swarm best
@@ -169,12 +169,8 @@ def Solve(max_epochs, n, dim, minx, maxx, inertia, c1,c2,warm_start = 1, init_po
    
     while epoch < max_epochs: 
         # evaluate validation loss every 10 epochs
-        if epoch % 10 == 0 and epoch > 1:
-            print "Epoch = " + str(epoch) +\
-                 " best training error = %.3f" % best_swarm_err[-1] + \
-                " Validation error = %.3f" % val_loss[-1]
         args = (model,X_val,Y_val)
-        val_loss.append( error(best_swarm_pos, *args))
+        val_loss.append( error(best_swarm_pos, n_nodes, *args))
 
         for i in range(n): # process each particle
             # compute new velocity of curr particle
@@ -198,7 +194,7 @@ def Solve(max_epochs, n, dim, minx, maxx, inertia, c1,c2,warm_start = 1, init_po
             
             args = (model,X_tr,Y_tr)
             # compute error of new position
-            swarm[i].error = error(swarm[i].position,*args)
+            swarm[i].error = error(swarm[i].position, n_nodes, *args)
 
             # is new position a new best for the particle?
             if swarm[i].error < swarm[i].best_part_err[-1]:
@@ -231,7 +227,7 @@ def PSO(X, Y, weights):
     X_tr,X_val,Y_tr,Y_val = X_tr_temp[:-n_val], X_tr_temp[-n_val:],Y_tr_temp[:-n_val],Y_tr_temp[-n_val:]
 
     # define neural network
-    n_nodes= [X.shape[1],24,12,1]
+    n_nodes= [X.shape[1],21,12,1]
     batch_size = 4096
 
     # define parameters for PSO
@@ -244,23 +240,38 @@ def PSO(X, Y, weights):
     c1 = 1.49445 # cognitive (particle)
     c2 = 3.49445 # social (swarm)
 
-    print "\nBegin particle swarm optimization using Python demo\n"
-    print "Goal is to solve MSE's function in " + str(dim) + " variables"
-    print "Setting num_particles = " + str(num_particles)
-    print "Setting max_epochs    = " + str(max_epochs)
-    print "\nStarting PSO algorithm\n"
+    # print "\nBegin particle swarm optimization using Python demo\n"
+    # print "Goal is to solve MSE's function in " + str(dim) + " variables"
+    # print "Setting num_particles = " + str(num_particles)
+    # print "Setting max_epochs    = " + str(max_epochs)
+    # print "\nStarting PSO algorithm\n"
 
     start = time.time()
-    best_position,best_error = Solve(max_epochs, num_particles,
-        dim, -1.0, 1.0,inertia, c1,c2,warm_start=0, init_position=init_position)
+    best_position,best_error = Solve(X_tr,X_val,Y_tr,Y_val, model, n_nodes, max_epochs, num_particles,
+        dim, -1.0, 1.0,inertia, c1,c2,init_position,warm_start=0)
     t = time.time()
-    print"\nPSO completed in {} seconds \n".format(t-start)
-    print"\nBest solution found:"
-    model.set_weights(decode(best_position))
+    # print"\nPSO completed in {} seconds \n".format(t-start)
+    # print"\nBest solution found:"
+    model.set_weights(decode(best_position, n_nodes))
 
-    print 'Evaluating on the test set:'
+    # print 'Evaluating on the test set:'
     args = (model,X_test,Y_test)
-    err = error(best_position, *args)
-    print"Test error of best solution = %.6f" % err
+    err = error(best_position, n_nodes, *args)
+    # print"Test error of best solution = %.6f" % err
 
-    return decode(best_position)  
+    return decode(best_position, n_nodes)
+
+if __name__ == '__main__':
+    np.random.seed(205)
+    input_col = 42
+    num_neutron_1 = 24
+    num_neutron_2 = 12
+    output_col=1 
+    subdata = np.random.random([1000,input_col+1])
+    w1 = np.random.normal(loc=0,scale=1./np.sqrt(input_col),size=(input_col,num_neutron_1))
+    w2 = np.random.normal(loc=0,scale=1./np.sqrt(num_neutron_1),size=(num_neutron_1,num_neutron_2))
+    w3 = np.random.normal(loc=0,scale=1./np.sqrt(num_neutron_2),size=(num_neutron_2,output_col))
+    b1 = np.zeros(num_neutron_1)
+    b2 = np.zeros(num_neutron_2)
+    b3 = np.zeros(output_col)
+    w1,b1,w2,b2,w3,b3 = PSO(subdata[:,1:],subdata[:,0:1],[w1,b1,w2,b2,w3,b3]) ## batchsize=50, penalty parameter=1
