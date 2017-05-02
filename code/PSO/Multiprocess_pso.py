@@ -319,7 +319,7 @@ if __name__=='__main__':
 
     start = time.time()
     best_position,best_error = Solve(X_tr,Y_tr,max_epochs, num_particles,
-     dim, -1.0, 1.0,inertia, c1,c2,warm_start=0)
+     dim, -1.0, 1.0,inertia, c1,c2,warm_start=1)
     t = time.time()-start
     print"\nTraining PSO completed in ",t, 'seconds'  
     print"\nBest solution found:"
