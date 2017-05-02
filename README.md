@@ -101,23 +101,17 @@ Figure 4 and 5 compares the running time till convergence and average running ti
 
 +*Figure 5: Time until convergence per iteration for all models/algorithms. Models with description 'big batch' were trained using a batch size of 4096 observations.*
 
-Figure 6 and 7 shows the strong scaling. We find in both figures, the batch size does not affect the runtime too much. This suggests in each model replica, matrix computations are well handled, and can is not a bottleneck of our algorithm. Comparing the curves for different chain lengths, we see that chain length = 1 (instant updating scheme) leads to longer average per iteration time, but shorter overall convergence time. These observations support the specification in Optimization Methods section. We suppose that if the communication cost is high (internet speed, data chunk sizes, communication barriers, etc.), the cumulaive updating scheme could outperform the instant version.
+Figure 6 shows the strong scaling. We find in both graphs, the batch size does not affect the runtime too much. This suggests in each model replica, matrix computations are well handled, and can is not a bottleneck of our algorithm. Comparing the curves for different chain lengths, we see that chain length = 1 (instant updating scheme) leads to longer average per iteration time, but shorter overall convergence time. These observations support the specification in Optimization Methods section. We suppose that if the communication cost is high (internet speed, data chunk sizes, communication barriers, etc.), the cumulaive updating scheme could outperform the instant version.
 
-<center><img src="images/plot3_ADAperNode_time.png" alt="ADA vs node" align="middle" style="width: 400px;"/></center>
+<center><img src="images/plot3_ADAperNode_time.png" alt="ADA vs node" align="middle" style="width: 300px;"/><img src="images/plot4_ADAperNode_timePerIteration.png" alt="ADA vs node per iteration" align="middle" style="width: 300px;"/></center>
 
-*Figure 6: Total time until convergence by node for all ADA algorithms run with 4 cores. Dashed lines belong to algorithms where each model replica had to run 20 iterations before pushing gradient weight to master node. We would expect a longer time among the latter algorithm.*
+*Figure 6: (left) Total time until convergence by node for all ADA algorithms run with 4 cores. Dashed lines belong to algorithms where each model replica had to run 20 iterations before pushing gradient weight to master node. We would expect a longer time among the latter algorithm. (Right) Time until convergence per iteration by node for all ADA algorithms run with 4 cores. Notice that algorithms with at least 20 iterations in model replica (dashed lines) are faster by iteration than the other two algorithms (solid lines).*
 
-
-<center><img src="images/plot4_ADAperNode_timePerIteration.png" alt="ADA vs node per iteration" align="middle" style="width: 400px;"/></center>
-
-*Figure 7: Time until convergence per iteration by node for all ADA algorithms run with 4 cores. Notice that algorithms with at least 20 iterations in model replica (dashed lines) are faster by iteration than the other two algorithms (solid lines).*
-
-In figure 7, we examined the predictive accuracy of our models. The baseline accuracy is ~40%. We find none of these methods give high accuracies (e.g. >80%). Apart from the inherent difficulties of predicting stock price data, we could probably gain higher accuracies if we have larger input dimensions (e.g. more indexes, make use of time dependencies of timestamp data, etc.) or more suitable network structures (e.g. dropouts, recursive neural networks, deeper network, etc.) A worrying observation is that MPI based models seem to have higher variances in accuracies. We think it could be helpful to run model "multiple times", by shuffling and re-scattering data to data shards.
+In figure 6 to the right, we examined the predictive accuracy of our models. The baseline accuracy is ~40%. We find none of these methods give high accuracies (e.g. >80%). Apart from the inherent difficulties of predicting stock price data, we could probably gain higher accuracies if we have larger input dimensions (e.g. more indexes, make use of time dependencies of timestamp data, etc.) or more suitable network structures (e.g. dropouts, recursive neural networks, deeper network, etc.) A worrying observation is that MPI based models seem to have higher variances in accuracies. We think it could be helpful to run model "multiple times", by shuffling and re-scattering data to data shards.
 
 <center><img src="images/plot5_accuracy.png" alt="Model table" align="Accuracy" style="width: 400px;"/></center>
 
-*Figure 8: Accuracies of all models, which ranged from 0.4153 (MPI+ADA 6 nodes and 4 cores on large batch size) to 0.5849 (MPI+ADA 8 nodes and 5 cores on smaller batch).*
-
+*Figure 7: Accuracies of all models, which ranged from 0.4153 (MPI+ADA 6 nodes and 4 cores on large batch size) to 0.5849 (MPI+ADA 8 nodes and 5 cores on smaller batch).*
 
 
 ## Conclusions and Discussions
