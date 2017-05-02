@@ -84,7 +84,7 @@ plot(n, ada_n, type = "l", col = "green", lwd = 3, ylim = c(0, max(ada_n, big_n,
 lines(n, big_n, col = "dark green", lwd = 3)
 lines(n, ada20, col = "green", lty = 3, lwd = 3)
 lines(n, big20, col = "dark green", lty = 3, lwd = 3)
-legend("topright", legend = c("1024 with 1 chain", "4096 with 1 chain", "1024 with 20 chains", "4096 with 20 chains"), col = rep(c("green", "dark green"),2), lwd = 3, lty = c(1,1,3,3), title = "Batch size", cex = .7)
+legend("topright", legend = c("1024 with chain length 1", "4096 with chain length 1", "1024 with chain length 20", "4096 with chain length 20"), col = rep(c("green", "dark green"),2), lwd = 3, lty = c(1,1,3,3), title = "Batch size", cex = .7)
 dev.off()
 
 # Time per iteration
@@ -97,7 +97,7 @@ plot(n, ada_n, type = "l", col = "green", lwd = 3, ylim = c(0, max(ada_n, big_n,
 lines(n, big_n, col = "dark green", lwd = 3)
 lines(n, ada20, col = "green", lty = 3, lwd = 3)
 lines(n, big20, col = "dark green", lty = 3, lwd = 3)
-legend("topright", legend = c("1024 with 1 chain", "4096 with 1 chain", "1024 with 20 chains", "4096 with 20 chains"), col = rep(c("green", "dark green"),2), lwd = 3, lty = c(1,1,3,3), title = "Batch size", cex = .7)
+legend("topright", legend = c("1024 with chain length 1", "4096 with chain length 1", "1024 with chain length 20", "4096 with chain length 20"), col = rep(c("green", "dark green"),2), lwd = 3, lty = c(1,1,3,3), title = "Batch size", cex = .7)
 dev.off()
 
 ## Accuracy:
