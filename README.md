@@ -51,6 +51,7 @@ We execute data and model parallelism at two levels. Firstly, each machine (e.g.
 Secondly, each model replica aimed to compute ∆𝑤 by averaging the mini-batch gradients from 64 or 32 (depend on number of cores in a node) parallel threads (see Figure 2). We attempted to implement this level of parallelism with OpenMP (Cython parallel module). However, we were unsuccessful with this implementation, so we used OpenMP/CUDA for BLAS in each model replica (to parallel matrix computations) and tested at different cores. 
 
 ![architecture](images/architecture.png)
+
 *Figure 2: Desired parallelization in each model replica.*
 
 ![true architecture](images/true_architecture.png)
