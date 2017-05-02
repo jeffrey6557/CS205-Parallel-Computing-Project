@@ -7,7 +7,7 @@ Chang Liu, Greyson Liu, Kamrine Poels, Linglin Huang
 ## Background
 Despite the availability of high-frequency stock market data, its use in forecasting stock prices is studied to a lesser extent. Similarly, despite the recent success of neural network on as a forecasting method, its power in forecasting high-frequency dynamics has been relatively overlooked. In addition, most of the studies in the literature have been focused on stock market indices instead of individual stocks. A possible explanation is the intractable computational intensity of training neural networks on the massive volume of high-frequency data of individual stocks. This motivates our study on applying parallelism to the training task and evaluate its performance to demonstrate weak and strong scaling.
 
-Parallel neural network has also been a topic of great interest. There are generally two paradigms of parallelisation: data parallelism and model parallelism. Data Parallel is straightforward. Its correctness is mathematically supported, and is very commonly implemented with MPI [4]. Model parallel is more complicated. For large models that include millions to billions of parameters, the whole neural network is partitioned across different machines, and usually implemented with openMP and GPU. For our intended purpose, we can fit the whole network into one machine so that parallelism is applied to the largest computational bottleneck - BLAS operations in backpropagation algorithm. 
+Parallel neural network has also been a topic of great interest. There are generally two paradigms of parallelisation: data parallelism and model parallelism. Data Parallel is straightforward. Its correctness is mathematically supported, and is very commonly implemented with MPI [4]. Model parallel is more complicated. For large models that include millions to billions of parameters, the whole neural network is partitioned across different machines, and usually implemented with openMP and GPU. For our intended purpose, we can fit the whole network into one machine so parallelism is applied to the largest computational bottleneck - BLAS operations in backpropagation algorithm. 
 
 
 ## Data
@@ -39,9 +39,9 @@ We implement a **fully connected** network with:
 
 1. L = 4 layers
 2. number of neurons = 42,24,12,1; fewer neurons in deeper layers (pyramidal architecture)
-3. Optimizer ADAM learning rate, other parameters such as momentum
+3. Gradient-based and non-gradient-based optimizers (AdaGrad, Hessian Free, and Particle Swarm Optimization)
 4. ReLu/MSE activation, linear activation for output node
-5. L2 and maxnorm regularization, early stopping(patience=5), dropouts(20%)
+5. L2 and maxnorm regularization, early stopping, dropouts
 
 ### Parallelism Architecture
 
@@ -70,6 +70,7 @@ Secondly, each model replica aimed to compute ∆𝑤 by averaging the mini-batc
 - **Hessian-Free (Truncated Newton Method)**: an approximation of the Hessian is calculated, which saves time and computational resources, when updating using the well known Newton method. However, this method updates the model parameters sequentially and does not naturally fit into our MPI parallel architecture. Therefore, we implemented a standalone version with one level of parallelisation (using GPU as a feature of the `hessionfree` pacakge).
 
 - **Particle Swarm Optimization (PSO)**: computational method that solves a problem by having a population of candidate solutions, or particles, and moving these around in the search-space according to simple mathematical formulae over the particle's position and velocity. Each particle's movement is influenced by its local best known position, but is also guided toward the best known positions in the search-space, which are updated as better positions are found by other particles. This is expected to move the swarm toward the best solutions.
+     - Hybrid system (global + local search): Initialized swarms with AdaGrad, then update swarms with PSO methods
 
 AdaGrad is implemented using [Keras](https://keras.io), and Hessian-free is applied using [hessianfree](http://pythonhosted.org/hessianfree/index.html), parallel Particle Swarm Optimization is implemented mulitprocessing module in python and adapted from [here](https://jamesmccaffrey.wordpress.com/2015/06/09/particle-swarm-optimization-using-python/).
 
@@ -101,17 +102,19 @@ Figure 4 and 5 compares the running time till convergence and average running ti
 
 *Figure 5: Time until convergence per iteration for all models/algorithms. Models with description 'big batch' were trained using a batch size of 4096 observations.*
 
-Figure 6 shows the strong scaling. We find that in both graphs the batch size does not affect the runtime too much. This suggests in each model replica, matrix computations are well handled, and can is not a bottleneck of our algorithm. Comparing the curves for different chain lengths, we see that chain length = 1 (instant updating scheme) leads to longer average per iteration time, but shorter overall convergence time. These observations support the specification in Optimization Methods section. We suppose that if the communication cost is high (internet speed, data chunk sizes, communication barriers, etc.), the cumulaive updating scheme could outperform the instant version.
+Figure 6 shows the strong scaling. We find that in both graphs the batch size does not affect the runtime too much. This suggests in each model replica, matrix computations are well handled, and can is not a bottleneck of our algorithm. Comparing the curves for different chain lengths, we see that chain length = 1 (instant updating scheme) leads to longer average per iteration time, but shorter overall convergence time. These observations support the specification in Optimization Methods section. We suppose that if the communication cost is high (internet speed, data chunk sizes, communication barriers, etc.), the cumulative updating scheme could outperform the instant version.
 
 <center><img src="images/plot3_ADAperNode_time.png" alt="ADA vs node" align="middle" style="width: 300px;"/><img src="images/plot4_ADAperNode_timePerIteration.png" alt="ADA vs node per iteration" align="middle" style="width: 300px;"/></center>
 
 *Figure 6: (left) Total time until convergence by node for all ADA algorithms run with 4 cores. Dashed lines belong to algorithms where each model replica had to run 20 iterations before pushing gradient weight to master node. We would expect a longer time among the latter algorithm. (Right) Time until convergence per iteration by node for all ADA algorithms run with 4 cores. Notice that algorithms with at least 20 iterations in model replica (dashed lines) are faster by iteration than the other two algorithms (solid lines).*
 
-In figure 7, we examined the predictive accuracy of our models. The baseline accuracy is ~40%. We find none of these methods give high accuracies (e.g. >80%). Apart from the inherent difficulties of predicting stock price data, we could probably gain higher accuracies if we have larger input dimensions (e.g. more indexes, make use of time dependencies of timestamp data, etc.) or more suitable network structures (e.g. dropouts, recursive neural networks, deeper network, etc.) A worrying observation is that MPI based models seem to have higher variances in accuracies. We think it could be helpful to run model "multiple times", by shuffling and re-scattering data to data shards.
+In figure 7, we examined the predictive accuracy of our models. The baseline accuracy is ~40%. We find none of these methods give high accuracies, which is expected according to the market efficiency of large liquid stock like Goldman Sachs. Apart from the inherent difficulties of predicting stock price data, we could probably gain higher accuracies if we have larger input dimensions (e.g. more indexes, make use of time dependencies of timestamp data, etc.) or more suitable network structures (e.g. local connected network, recurrent  networks, deeper network, etc.) A worrying observation is that MPI based models seem to have higher variances in accuracies. We think it could be helpful to run model "multiple times", by shuffling and re-scattering data to data shards.
 
 <center><img src="images/plot5_accuracy.png" alt="Model table" align="Accuracy" style="width: 400px;"/></center>
 
-*Figure 7: Accuracies of all models, which ranged from 0.4153 (MPI+ADA 6 nodes and 4 cores on large batch size) to 0.5849 (MPI+ADA 8 nodes and 5 cores on smaller batch).*
+*Figure 7: Accuracies of all models, which ranged from 0.4153 (MPI+ADA 6 nodes and 4 cores on large batch size) to 0.5849 (MPI+ADA 8 nodes and 5 cores on smaller batch). *
+
+The running time for sequential hydrid system PSO + AdaGrad for 100 swarms took 3036 seconds to converge, hence highly inefficient and not comparable with other methods. We parallised across swarms in Python's multiprocessing module because the problem size scales with the number of swarms. However, our speedups with 8, 16, 32, 64 threads for are not significant (less than 2), partly because the module-specific overheads of creating and merging threads which becomes the computational bottleneck since all the computations are now cheap scalar arithmetics. For furture work, a better implemenation would be written in Cython and integrated with MPI.  
 
 
 ## Conclusions and Discussions
