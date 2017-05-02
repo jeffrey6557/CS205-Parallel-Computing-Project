@@ -53,11 +53,11 @@ We execute data and model parallelism at two levels. Firstly, each machine (e.g.
 
 Secondly, each model replica aimed to compute ∆𝑤 by averaging the mini-batch gradients from 64 or 32 (depend on number of cores in a node) parallel threads (see Figure 2). We attempted to implement this level of parallelism with OpenMP (Cython parallel module). However, we were unsuccessful with this implementation, so we used OpenMP/CUDA for BLAS in each model replica (to parallel matrix computations) and tested at different cores. 
 
-<img src="images/architecture.png" alt="architecture" style="width: 400px;"/>
+<img src="images/architecture.png" alt="architecture" align="middle" style="width: 400px;"/>
 
 *Figure 2: Desired parallelization in each model replica.*
 
-<img src="images/true_architecture.png" alt="true architecture" style="width: 400px;"/>
+<img src="images/true_architecture.png" alt="true architecture" align="middle" style="width: 400px;"/>
 
 *Figure 3: Real architecture of our algorithm. Note that node 0 is the master node, where the optimization takes place, and node 1 through 7 (number of total nodes can and will vary) is a model replica, where the calculationg of the gradient of weight occurs.*
 
@@ -88,7 +88,7 @@ We present the layout of our model combinations and their analysis. First, we ar
 
 <!-- ![Model table](images/model_table.png) -->
 
-<img src="images/model_table.png" alt="Model table" style="width: 400px;"/>
+<img src="images/model_table.png" alt="Model table" align="middle" style="width: 400px;"/>
 
 *Table 1: We run Hessian-free and AdaGrad in GPU. Not included in this table, we also run AdaGrad with 3, 4, 5, 6, 7 and 8 cores at 4 cores each (using MPI), but we force an earlier stop (maximum 2000 iterations).*
 
