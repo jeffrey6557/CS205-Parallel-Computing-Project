@@ -114,7 +114,7 @@ In figure 7, we examined the predictive accuracy of our models. The baseline acc
 
 *Figure 7: Accuracies of all models, which ranged from 0.4153 (MPI+ADA 6 nodes and 4 cores on large batch size) to 0.5849 (MPI+ADA 8 nodes and 5 cores on smaller batch). *
 
-The running time for sequential hydrid system PSO + AdaGrad for 100 swarms took 3036 seconds to converge, hence highly inefficient and not comparable with other methods. We parallised across swarms in Python's multiprocessing module because the problem size scales with the number of swarms. However, our speedups with 8, 16, 32, 64 threads for are not significant (less than 2), partly because the module-specific overheads of creating and merging threads which becomes the computational bottleneck since all the computations are now cheap scalar arithmetics. For furture work, a better implemenation would be written in Cython and integrated with MPI.  
+The running time for sequential hydrid system PSO + AdaGrad for 100 swarms took 3036 seconds to converge, hence highly inefficient and not comparable with other methods. We parallised across swarms because the problem size scales with the number of swarms. However, our speedups with 8, 16, 32, 64 threads are not significant (less than 2), partly because the module-specific overheads of creating and merging threads which becomes the computational bottleneck since all the computations are now cheap scalar arithmetics. For furture work, a better implemenation would be written in Cython and integrated with MPI.  
 
 
 ## Conclusions and Discussions
