@@ -132,13 +132,15 @@ conf interval [2.83071260629,2.83071260629]
 
 # pso results (sequential)
 
+# pso params: reached 1000 epoch (no other convergence criterion) with 100 particles; inertia 1 c1 1.49 c2 3.49
+
 # total running time: 07:21:34 (HH:MM:SS)  - if you substract the initialization of each particle by keras (warm start), 1000 epochs take   07:21:34 - 100 particles * ~10 seconds/particle
 
 # experimental settings
 
 # second level inputs data N~100,000;
 
-# pso params: reached 1000 epoch (no other convergence criterion) with 100 particles; inertia 1 c1 1.49 c2 3.49
+
 Begin particle swarm optimization using Python demo
 
 Goal is to solve MSE's function in 1345 variables
