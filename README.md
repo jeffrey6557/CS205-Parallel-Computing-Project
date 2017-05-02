@@ -47,7 +47,7 @@ We implement a **fully connected** network with:
 
 We execute data and model parallelism at two levels. Firstly, each machine (e.g. an Odyssey node) will store a Data Shard (a subset of data) and train a model replica independently and asynchronously (see Figure 1.) Each replica will fetch weights (𝑤) from the parameter server (the master node), compute ∆𝑤, and push ∆𝑤 to the server or master node. The parameter server updates the parameter set whenever it receives ∆𝑤 from a model replica. This archetecture is reasonable because the updating and validation process envolves much less computation than back-propagration in the model replicas. We analyzed three different optimization algorithms for the update of the weights. The fetching and pushing weights and gradient weights to the master node was implemented with MPI (`mpi4py` package).
 
-<img src="images/architecture_abstract_2.png" alt="architecture_abstract" style="width: 400px;"/>
+<img src="images/architecture_abstract_2.png" alt="architecture_abstract" align = "middle" style="width: 400px;"/>
 
 *Figure 1: Parallelised Neural Network Architecture [3]. Model replicas asynchronously fetch parameters 𝑤 and push ∆𝑤 to the parameter server.*
 
@@ -71,7 +71,7 @@ Secondly, each model replica aimed to compute ∆𝑤 by averaging the mini-batc
 
 - **Particle Swarm Optimization (PSO)**: computational method that solves a problem by having a population of candidate solutions, or particles, and moving these around in the search-space according to simple mathematical formulae over the particle's position and velocity. Each particle's movement is influenced by its local best known position, but is also guided toward the best known positions in the search-space, which are updated as better positions are found by other particles. This is expected to move the swarm toward the best solutions.
 
-AdaGrad is implemented using [Keras](https://keras.io), and Hessian-free is applied using [hessianfree](http://pythonhosted.org/hessianfree/index.html), parallel Particle Swarm Optimization is implemented mulitprocessing module in python and adapted from [here] (https://jamesmccaffrey.wordpress.com/2015/06/09/particle-swarm-optimization-using-python/). 
+AdaGrad is implemented using [Keras](https://keras.io), and Hessian-free is applied using [hessianfree](http://pythonhosted.org/hessianfree/index.html), parallel Particle Swarm Optimization is implemented mulitprocessing module in python and adapted from [here](https://jamesmccaffrey.wordpress.com/2015/06/09/particle-swarm-optimization-using-python/). 
 
 #### Validation and Testing 
 
@@ -84,18 +84,15 @@ Within the training data, we use 80% of this dataset to train in the model repli
 
 #### Outline of Experiments
 
-We present the layout of our model combinations and their analysis. First, we are interested in the observeded time until convergence and average time per iteration. <span style="color:red">**We also record and compare accuracy among the models.**</span>. 
-
-<!-- ![Model table](images/model_table.png) -->
+We present the layout of our model combinations and their analysis. First, we are interested in the observed time until convergence and average time per iteration. We also record and compare accuracy among the models. Moreover, we observe the behavior of some of our algorithms (MPI+ADA) when we set a minimum length of iterations in each model replica. We vary this minimum limit by comparing 1 vs 20 minimum iterations.
 
 <img src="images/model_table.png" alt="Model table" align="middle" style="width: 400px;"/>
 
 *Table 1: We run Hessian-free and AdaGrad in GPU. Not included in this table, we also run AdaGrad with 3, 4, 5, 6, 7 and 8 cores at 4 cores each (using MPI), but we force an earlier stop (maximum 2000 iterations).*
 
-Also, we run 
-
 ## Results
 
+<<<<<<< HEAD
 ## Conclusions and Discussions
 
 
@@ -109,55 +106,33 @@ In our experiments, we find there are significant overheads for initializing MPI
 First, we test the correctness of MPI implementation with data generated from a simple linear model. This is a reasonable *naïve* test case because ANN with zero hidden layers reduces to a linear regression if the activation function is linear.
 
 ![loss](images/simulation_MPI_loss.png)
+=======
+<img src="images/plot1_timeUntilConvergence.png" alt="Time until convergence" align="middle" style="width: 600px;"/>
+>>>>>>> 61dc896afed0bb3637d2fa09721ba1a4aa666f95
 
-*Figure 3: MPI simulation, loss function. The loss decreases almost exponentially as the number of epochs increases.*
+*Figure 4: Total time until convergence for all models/algorithms. Models with description 'big batch' were trained using a batch size of 4096 observations.*
 
-![beta](images/simulation_MPI_beta.png)
+<img src="images/plot2_timeWithFixedIterations.png" alt="Time with fixed iterations" align="middle" style="width: 600px;"/>
 
-*Figure 4: Convergence of parameters. All three parameters converged to their true values, respectively.*
+*Figure 5: Time until convergence per iteration for all models/algorithms. Models with description 'big batch' were trained using a batch size of 4096 observations.*
 
-The decrease in the loss between predicted and observed outcomes and the convergence to the true value demonstrate that our MPI algorithm operates correctly.
+<img src="images/plot3_ADAperNode_time.png" alt="ADA vs node" align="middle" style="width: 400px;"/>
 
-#### Performance of a Model Replica
+*Figure 6: Total time until convergence by node for all ADA algorithms run with 4 cores. Dashed lines belong to algorithms where each model replica had to run 20 iterations before pushing gradient weight to master node. We would expect a longer time among the latter algorithm.*
 
-We test the performance of a single model replica using each of the model replica algorithms versus CUDA implementation on predicting minute-level stock returns of Goldman Sachs in 2016. With an input size of 100,000 observations, we train a model with 75% of the stock prices and test it on the rest of the data. The batch size is 1,024 per model replica, a neural network has 3 hidden layers with 24, 12, 6 neurons, respectively. The maximum number of epochs (loosely defined as an iteration over iterations) was set to 100, and the initial learning rate is 0.001. The activation function is Relu except on the last layer, the output, where the activation function is linear. Below we show the average running time of the algorithms, including CUDA, which still outperforms the other optimization methods. We ran a total of 100 models for each algorithm.
+<img src="images/plot4_ADAperNode_timePerIteration.png" alt="ADA vs node per iteration" align="middle" style="width: 400px;"/>
 
-![all times](images/experiment4_times.png)
+*Figure 7: Time until convergence per iteration by node for all ADA algorithms run with 4 cores. Notice that algorithms with at least 20 iterations in model replica (dashed lines) are faster by iteration than the other two algorithms (solid lines).*
 
-<!-- Secondly, we tested the performance of a single model replica using OpenMP versus CUDA implementation on predicting minute-level stock returns of Goldman Sachs in 2016. We trained a fully-connected neural network with 4 layers (# units = [42,24,12,1]) and stop training once validation is not improving for 5 epochs. For speedup experiments, epochs are set to 100. 
+<img src="images/plot5_accuracy.png" alt="Model table" align="Accuracy" style="width: 600px;"/>
 
-![loss](images/GPU_loss.png) 
+*Figure 8: Accuracies of all models, which ranged from 0.4153 (MPI+ADA 6 nodes and 4 cores on large batch size) to 0.5849 (MPI+ADA 8 nodes and 5 cores on smaller batch).*
 
-*Figure 5: Convergence of loss function of different implementations (Max epochs = 100, batch size=128) *
+## Conclusions and Discussions
 
-![speedups](images/speedups.png)
+In our experiments, we find there are significant overheads for initializing MPI, OpenMP and GPU settings, but did not observe too much communication cost. We think this is because the nodes in seas\_iacs partition on Odyssey are connected with high-speed Infiniband network, and the nodes finish the same amount of computation at different times due to differences in computational throughput. If the nodes have very similar computational performance in the MPI world, we may also vary the batch size for each model replica such that the updating process can be asyncronized.
 
-*Figure 6: Speedups/thoughput (Epochs = 100) OpenMP with 32 threads and CUDA with 1 GPU machine. *
-
-We observe that loss function converges rather quickly and has a smooth trajectory due to the relatively large size of our batches. In terms of speedups, there is a performance peak at the batch size of 128. 
--->
-
-We evaluate our model with the following metrics:
-
-1. Effectiveness
-    
-    + Convergence of our models versus traditional implementation of sequential SGD 
-
-2. Accuracies
-  
-    - MSE 
-    - MSPE
-    - Directional Accuracy
-    - Hit ratio
-
-<span style="color:red"> **** </span>
-
-3. Computational cost	
-    + Speedups, efficiencies, and throughputs (in Gflop/s) for different number of nodes, number of cores per core, different model size (# parameters).
-
-<span style="color:red"> **How to get Gflop/s (time is given, cores can be deduced, how to we incorporate nodes)** </span>
-
-## Conclusion
+## Software 
 
 ## References
 [1] Selmi, N., Chaabene, S., & Hachicha, N. (2015). Forecasting returns on a stock market using Artificial Neural Networks and GARCH family models: Evidence of stock market S&P 500. Decision Science Letters,4(2), 203-210. doi:10.5267/j.dsl.2014.12.002
