@@ -15,13 +15,12 @@ Technical indicators of price series includes:
 
  1. Exponential Moving Averages (EMA) and Moving Averages (MA)
  2. Past k-period log returns
- 3. Price Trend indicators (AD, Adv, ADR)
+ 3. PSY: fraction of upward movement in the past k-period
  4. Price and returns volatility over k periods
  5. Momentum: Change in price in k periods
  6. Disparity: last available price over MA
- 7. PSY: fraction of upward movement in the past k-period
  
-The output is the predicted return at minute t+1 for stock j. We normalize all the input and output variables using z-score and unit norm per feature:
+The output is the predicted return at minute t+1 for stock j. We normalize all the input and output variables using z-score and unit norm per feature.
 
 ## Methods
 
@@ -130,12 +129,10 @@ We observe that loss function converges rather quickly and has a smooth trajecto
 
 # Validation and Testing Methods
 
-Because of the time series nature of the high-frequency data, we employ a walk-forward method that is suited for back-testing financial time series model. For each rolling window, we search for the best hyperparameters (#layers, nodes, etc) in the "validation timestep", and then evaluate the performance in the "testing timestep".
-
+Because of the time series nature of the high-frequency data, we employ a walk-forward method that is suited for back-testing financial time series model, instead of k-fold cross-validation, to avoid forward-looking bias. For each rolling window, we determine if for each  epoch, our iterative machine learning algorithms (Adagrad, Hessian Free, Particle Swarm Optimization) should stop the training process based on the loss calculated on the "validation timestep". If we do terminate the algorithm, we then evaluate the performance of the final model in the "testing timestep". For simplicity and fair comparison, we used window size = 1 for all the algorithms, because for some algorithm like sequential Particle Swarm Optimization, running one window frame can take more than 7 hours on Odyssey. 
 
 ![backtest](images/backtest.png)
 *Figure 6: Walk-forward method for time series prediction.*
-
 
 The walk-forward method is implemented as follows: 
 
@@ -144,16 +141,13 @@ The walk-forward method is implemented as follows:
 # Output: predicted values from t = T-training_size-validation_size : T-1 
 for t in range(training_size + validation_size, T): 
     if t % test_size != 1:
-        # predict on time t using a trained ensemble Neural Network;
+        # predict on time t using a trained Neural Network;
     else:
         training_data = data[t - training_size- validation_size : t - validation_size]
         validation_data = data[t- validation_size: t]
         for i in range(N_window):
-            # train the model based on a random starting point and \
-            #       a bootstrapped sample of window_size from training_data;
-            # cross-validate the architecture (# layer, neurons) 
-            # calculate validation accuracy 
-        # choose the top K models with highest accuracy to form an ensemble Neural Network; 
+            # train the model based on a random starting point and a bootstrapped sample of training_data;
+            # decide if we should terminate the algorithm based on the same validation_data
         # predicts on time t 
     # compute performance metrics on time t
 ```
@@ -172,10 +166,10 @@ We evaluate our model with the following metrics:
     + Convergence of our model versus traditional implementation of sequential SGD 
 
 2. Accuracies
-    
+  
     - MSE 
     - MSPE
-    - Directional Accuracy (fraction of correct predictions of up and downs per model, consider thresholded on predicted values such that only large predicted values count)
+    - Directional Accuracy
     - Hit ratio
 
 <span style="color:red"> **** </span>
