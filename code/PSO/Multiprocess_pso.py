@@ -23,17 +23,8 @@ import random
 import multiprocessing as mp
 
 
-
+# to turn on openmp
 #os.environ["THEANO_FLAGS"] = "device=cpu,openmp=1,floatX=float32"
-
-''' 
-    MAKE SURE YOU RUN THIS SECTION ONLY ONCE; RUNNING IT MORE THAN ONCE WILL ADD ON MORE LAYERS
-    YOU NEED TO RESTART THE IPYTHON KERNEL IF YOU WANT TO REFRESH THE MODEL
-
-'''
-##################################################################################################################
-##################################################################################################################
-
 
 def keras_NN(n_nodes):
     '''This function initializes and return a new neural network with regularization techniques
