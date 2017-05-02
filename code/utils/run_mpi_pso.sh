@@ -8,8 +8,8 @@
 #SBATCH --open-mode=append
 #SBATCH --mail-type=END,FAIL    # Type of email notification- BEGIN,END,FAIL,ALL
 #SBATCH --mail-user=linglin_huang@g.harvard.edu        # Email to which notifications will be sent
-#SBATCH -o MPI_ada_%j.out       # Standard out goes to this file
-#SBATCH -e MPI_ada_%j.err       # Standard err goes to this filehostname
+#SBATCH -o MPI_pso_%j.out       # Standard out goes to this file
+#SBATCH -e MPI_pso_%j.err       # Standard err goes to this filehostname
 
 module load Anaconda/2.1.0-fasrc01
 module load gcc
