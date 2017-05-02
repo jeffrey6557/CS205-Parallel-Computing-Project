@@ -99,7 +99,7 @@ Also, we run
 ## Conclusions and Discussions
 
 
-In our experiments, we find there are significant overheads for initializing MPI, OpenMP and GPU settings, but did not observe too much communication cost. We think this is because the nodes in seas\_iacs partition on Odyssey are connected with high-speed Infiniband network, and the nodes finish the same amount of computation at different times due to differences in computational throughput. If the nodes have very similar computational performance in the MPI world, we may also vary the batch size for each model replica such that the updating process can be asyncronized.
+In our experiments, we find there are significant overheads for initializing MPI, OpenMP and GPU settings, and only observed some but not too much communication cost, especially considering the time to convergence. We think this is because the nodes in seas\_iacs partition on Odyssey are connected with high-speed Infiniband network, and the nodes finish the same amount of computation at different times due to differences in computational throughput. If the nodes have very similar computational performance in the MPI world, we may also vary the batch size for each model replica such that the updating process can be asyncronized.
 
 
 ## Software 
