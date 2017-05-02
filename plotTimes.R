@@ -71,5 +71,26 @@ barplot(times, col = sampCol, main = "Running time per iteration", ylab = "Secon
 legend(length(times)+5.5,9, legend = c("Hessian-free GPU", "ADA CPU","ADA GPU","MPI+ADA 3 nodes 4 cores", "MPI+ADA 4 nodes 4 cores", "MPI+ADA 4 nodes 8 cores", "MPI+ADA 5 Nodes 4 cores", "MPI+ADA 6 nodes 4 cores", "MPI+ADA 7 nodes 4 cores", "ADA CPU\nbig batch","ADA GPU\nbig batch","MPI+ADA 3 nodes 4 cores\nbig batch", "MPI+ADA 4 nodes 4 cores\nbig batch", "MPI+ADA 4 nodes 8 cores\nbig batch", "MPI+ADA 5 Nodes 4 cores\nbig batch", "MPI+ADA 6 nodes 4 cores\nbig batch", "MPI+ADA 7 nodes 4 cores\nbig batch"), fill = sampCol, cex = .6, y.intersp = 1.5)
 dev.off()
 
+## Plots per node
+# Total time
+n = c(3:8)
+ada_n = c(128.506565809, 71.5182712078, 54.687912941, 58.7733278275, 68.8883149624, 127.44204998)
+big_n = c(165.719032049,95.7436389923,90.6643800735, 94.1150431633, 304.533075809, 103.547483921)
 
-##  
+png("images/plot3_ADAperNode_time.png")
+plot(n, ada_n, type = "l", col = "green", lwd = 3, ylim = c(0, max(ada_n, big_n)), xlab = "Number of Nodes", ylab = "Time in seconds", main = "Runtime of ADA \nOptimization with 4 cores")
+lines(n, big_n, col = "dark green", lwd = 3)
+legend("topleft", legend = c(1024, 4096), col = c("green", "dark green"), lwd = 3, lty = 1, title = "Batch size")
+dev.off()
+
+## Time per iteration
+ada_n = c(128.506565809/50, 71.5182712078/41, 54.687912941/32, 58.7733278275/43, 68.8883149624/54, 127.44204998/155)
+big_n = c(165.719032049/76, 95.7436389923/72, 90.6643800735/76, 94.1150431633/45, 304.533075809/531, 103.547483921/131)
+
+png("images/plot4_ADAperNode_timePerIteration.png")
+plot(n, ada_n, type = "l", col = "green", lwd = 3, ylim = c(0, max(ada_n, big_n)), xlab = "Number of Nodes", ylab = "Time in seconds (per iteration)", main = "Runtime per Iteration of ADA \nOptimization with 4 cores")
+lines(n, big_n, col = "dark green", lwd = 3)
+legend("topright", legend = c(1024, 4096), col = c("green", "dark green"), lwd = 3, lty = 1, title = "Batch size")
+dev.off()
+
+
