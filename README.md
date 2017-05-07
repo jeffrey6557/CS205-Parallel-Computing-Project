@@ -42,6 +42,7 @@ We implement a **fully connected** network with:
 3. Gradient-based and non-gradient-based optimizers (AdaGrad, Hessian Free, and Particle Swarm Optimization)
 4. ReLu/MSE activation, linear activation for output node
 5. L2 and maxnorm regularization, early stopping, dropouts
+<center><img src="http://mathurl.com/kt66pmj" style="width: 400px;"/></center>
 
 ### Parallelism Architecture
 
@@ -55,7 +56,7 @@ Secondly, each model replica aimed to compute ∆𝑤 by averaging the mini-batc
 
 <center><img src="images/architecture.png" alt="architecture" style="width: 400px;"/></center>
 
-![Image of Yaktocat](http://mathurl.com/5euwuy)
+
 
 
 *Figure 2: Desired parallelization in each model replica.*
