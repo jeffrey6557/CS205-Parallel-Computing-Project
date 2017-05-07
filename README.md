@@ -42,7 +42,7 @@ We implement a **fully connected** network with:
 3. Gradient-based and non-gradient-based optimizers (AdaGrad, Hessian Free, and Particle Swarm Optimization)
 4. ReLu/MSE activation, linear activation for output node
 5. L2 and maxnorm regularization, early stopping, dropouts
-<center><img src="http://mathurl.com/kt66pmj" style="width: 400px;"/></center>
+
 
 ### Parallelism Architecture
 
