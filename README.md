@@ -55,8 +55,8 @@ Secondly, each model replica aimed to compute ∆𝑤 by averaging the mini-batc
 
 <center><img src="images/architecture.png" alt="architecture" style="width: 400px;"/></center>
 
+![Image of Yaktocat](http://mathurl.com/5euwuy)
 
-<center><img src=http://mathurl.com/5euwuy/></center>
 
 *Figure 2: Desired parallelization in each model replica.*
 
